@@ -10,6 +10,12 @@ Calculate your body fat percentage using the official US Navy method based on bo
 ### Concept2 Watts ↔ Pace Calculator
 Convert between power output (watts) and pace for Concept2 rowing machines with bidirectional real-time conversion.
 
+### Tap Tempo BPM Calculator
+Detect beats per minute by tapping to the rhythm. Configurable sample size and timeout for accurate tempo measurement.
+
+### Digital Compass
+Real-time compass using device orientation sensors. Works on mobile devices with magnetometer for navigation and heading display.
+
 
 ## 🚀 Live Demo
 

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Compass - Real-time Mobile Orientation</title>
+    <meta name="description" content="Digital compass using device orientation sensors. Real-time heading display with cardinal directions. Works on mobile devices with magnetometer support.">
+    <meta name="keywords" content="digital compass, mobile compass, device orientation, magnetometer, heading, cardinal directions, navigation">
+    <meta name="author" content="guyru">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://guyru.github.io/calculators/digital-compass.html">
+    <meta property="og:title" content="Digital Compass - Real-time Mobile Orientation">
+    <meta property="og:description" content="Digital compass using device orientation sensors. Real-time heading display with cardinal directions for mobile devices.">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:url" content="https://guyru.github.io/calculators/digital-compass.html">
+    <meta property="twitter:title" content="Digital Compass - Real-time Mobile Orientation">
+    <meta property="twitter:description" content="Digital compass using device orientation sensors. Real-time heading display with cardinal directions for mobile devices.">
+    
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        .compass-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .heading-display {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .heading-value {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+        
+        .heading-label {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .cardinal-direction {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-top: 10px;
+        }
+        
+        .status-display {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+        
+        .status-display.error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        
+        .status-display.success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .accuracy-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .accuracy-dots {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .accuracy-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dee2e6;
+            transition: background-color 0.3s ease;
+        }
+        
+        .accuracy-dot.active {
+            background: #28a745;
+        }
+        
+        @media (max-width: 768px) {
+            .heading-value {
+                font-size: 2.5rem;
+            }
+        }
+        
+        .permission-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.2s ease;
+            margin: 20px 0;
+        }
+        
+        .permission-button:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="header">
+            <h1>Digital Compass</h1>
+            <p>Real-time compass using your device's orientation sensors</p>
+        </div>
+
+        <div class="compass-container">
+            <div class="heading-display">
+                <div class="heading-label">Heading</div>
+                <div class="heading-value" id="headingValue" aria-live="polite">--°</div>
+                <div class="cardinal-direction" id="cardinalDirection" aria-live="polite">--</div>
+            </div>
+
+            <div class="accuracy-indicator">
+                <span>Accuracy:</span>
+                <div class="accuracy-dots">
+                    <div class="accuracy-dot" id="accuracy1"></div>
+                    <div class="accuracy-dot" id="accuracy2"></div>
+                    <div class="accuracy-dot" id="accuracy3"></div>
+                    <div class="accuracy-dot" id="accuracy4"></div>
+                    <div class="accuracy-dot" id="accuracy5"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-display" id="statusDisplay">
+            <div id="statusMessage">Checking device compatibility...</div>
+            <button class="permission-button" id="permissionButton" style="display: none;">
+                Enable Compass
+            </button>
+        </div>
+
+        <div class="github-links">
+            <a href="index.html" aria-label="Back to calculators index">← Back to Calculators</a>
+            <a href="https://github.com/guyru/calculators" target="_blank" rel="noopener noreferrer">View Source</a>
+            <a href="https://github.com/guyru/calculators/issues" target="_blank" rel="noopener noreferrer">Report Issue</a>
+        </div>
+    </div>
+
+    <script>
+        class DigitalCompass {
+            constructor() {
+                this.currentHeading = 0;
+                this.accuracy = 0;
+                this.isSupported = false;
+                this.isPermissionGranted = false;
+                
+                this.headingValue = document.getElementById('headingValue');
+                this.cardinalDirection = document.getElementById('cardinalDirection');
+                this.statusDisplay = document.getElementById('statusDisplay');
+                this.statusMessage = document.getElementById('statusMessage');
+                this.permissionButton = document.getElementById('permissionButton');
+                
+                this.init();
+            }
+            
+            init() {
+                this.checkDeviceSupport();
+                this.setupEventListeners();
+            }
+            
+            checkDeviceSupport() {
+                if (typeof DeviceOrientationEvent !== 'undefined') {
+                    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                        this.showPermissionButton();
+                    } else {
+                        this.startCompass();
+                    }
+                } else {
+                    this.showError('Device orientation not supported. This feature requires a mobile device with magnetometer.');
+                }
+            }
+            
+            showPermissionButton() {
+                this.statusMessage.textContent = 'This compass requires access to device orientation sensors.';
+                this.permissionButton.style.display = 'inline-block';
+                this.statusDisplay.className = 'status-display';
+            }
+            
+            async requestPermission() {
+                try {
+                    const permission = await DeviceOrientationEvent.requestPermission();
+                    if (permission === 'granted') {
+                        this.isPermissionGranted = true;
+                        this.permissionButton.style.display = 'none';
+                        this.startCompass();
+                    } else {
+                        this.showError('Permission denied. Compass requires device orientation access.');
+                    }
+                } catch (error) {
+                    this.showError('Failed to request device orientation permission.');
+                }
+            }
+            
+            startCompass() {
+                this.isSupported = true;
+                this.statusMessage.textContent = 'Compass active. Hold device flat for best accuracy.';
+                this.statusDisplay.className = 'status-display success';
+                
+                this.setupOrientationListeners();
+            }
+            
+            setupOrientationListeners() {
+                let testHandlerTriggered = false;
+                
+                const testHandler = (event) => {
+                    testHandlerTriggered = true;
+                    
+                    window.removeEventListener('deviceorientationabsolute', testHandler);
+                    
+                    if (event.absolute === true || event.webkitCompassHeading !== undefined) {
+                        window.addEventListener('deviceorientationabsolute', this.handleOrientation.bind(this));
+                    } else {
+                        window.addEventListener('deviceorientation', this.handleOrientation.bind(this));
+                    }
+                };
+                
+                window.addEventListener('deviceorientationabsolute', testHandler);
+                
+                setTimeout(() => {
+                    if (!testHandlerTriggered) {
+                        window.removeEventListener('deviceorientationabsolute', testHandler);
+                        window.addEventListener('deviceorientation', this.handleOrientation.bind(this));
+                    }
+                }, 1000);
+            }
+            
+            handleOrientation(event) {
+                let rawHeading = null;
+                let headingSource = 'unknown';
+                
+                if (event.webkitCompassHeading !== undefined && event.webkitCompassHeading !== null) {
+                    rawHeading = event.webkitCompassHeading;
+                    headingSource = 'webkit';
+                    
+                    if (event.webkitCompassAccuracy !== undefined) {
+                        this.updateWebkitAccuracy(event.webkitCompassAccuracy);
+                    }
+                } 
+                else if (event.alpha !== null && event.alpha !== undefined) {
+                    rawHeading = 360 - event.alpha;
+                    headingSource = 'alpha';
+                    
+                    this.updateAlphaAccuracy(event);
+                }
+                
+                if (rawHeading !== null) {
+                    let heading = this.normalizeHeading(rawHeading);
+                    
+                    if (this.shouldSkipUpdate(heading)) return;
+                    
+                    this.updateDisplay(heading);
+                } else {
+                    this.showError('Unable to get compass heading. Device may not have a magnetometer.');
+                }
+            }
+            
+            normalizeHeading(heading) {
+                return ((heading % 360) + 360) % 360;
+            }
+            
+            shouldSkipUpdate(newHeading) {
+                if (this.currentHeading === 0) return false;
+                
+                let diff = Math.abs(newHeading - this.currentHeading);
+                if (diff > 180) diff = 360 - diff;
+                
+                return diff < 0.5;
+            }
+            
+            updateDisplay(heading) {
+                this.currentHeading = heading;
+                
+                this.headingValue.textContent = `${Math.round(heading)}°`;
+                
+                this.cardinalDirection.textContent = this.getCardinalDirection(heading);
+            }
+            
+            getCardinalDirection(heading) {
+                const directions = [
+                    'N', 'NNE', 'NE', 'ENE',
+                    'E', 'ESE', 'SE', 'SSE',
+                    'S', 'SSW', 'SW', 'WSW',
+                    'W', 'WNW', 'NW', 'NNW'
+                ];
+                
+                const index = Math.round(heading / 22.5) % 16;
+                return directions[index];
+            }
+            
+            updateWebkitAccuracy(webkitAccuracy) {
+                let accuracyLevel = 1;
+                if (webkitAccuracy >= 15) accuracyLevel = 5;
+                else if (webkitAccuracy >= 10) accuracyLevel = 4;
+                else if (webkitAccuracy >= 5) accuracyLevel = 3;
+                else if (webkitAccuracy >= 0) accuracyLevel = 2;
+                
+                this.accuracy = accuracyLevel;
+                this.updateAccuracyDisplay();
+            }
+            
+            updateAlphaAccuracy(event) {
+                let accuracyLevel = 0;
+                
+                if (event.alpha !== null) accuracyLevel++;
+                if (event.beta !== null) accuracyLevel++;
+                if (event.gamma !== null) accuracyLevel++;
+                if (event.absolute) accuracyLevel++;
+                
+                if (event.beta !== null && Math.abs(event.beta) < 30) accuracyLevel++;
+                
+                this.accuracy = Math.max(0, Math.min(5, accuracyLevel));
+                this.updateAccuracyDisplay();
+            }
+            
+            updateAccuracyDisplay() {
+                const dots = document.querySelectorAll('.accuracy-dot');
+                dots.forEach((dot, index) => {
+                    if (index < this.accuracy) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            }
+            
+            showError(message) {
+                this.statusMessage.textContent = message;
+                this.statusDisplay.className = 'status-display error';
+                this.permissionButton.style.display = 'none';
+            }
+            
+            setupEventListeners() {
+                this.permissionButton.addEventListener('click', () => {
+                    this.requestPermission();
+                });
+            }
+        }
+        
+        // Initialize compass when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new DigitalCompass();
+        });
+    </script>
+</body>
+</html>
