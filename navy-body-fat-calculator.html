@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navy Body Fat Calculator - Official US Navy Method</title>
+    <meta name="description" content="Calculate body fat percentage using the official US Navy circumference method. Accurate formulas for men and women with metric/imperial units. Based on research papers ADA143890 and ADA146456.">
+    <meta name="keywords" content="navy body fat calculator, body fat percentage, circumference method, naval health research, body composition, fitness calculator">
+    <meta name="author" content="guyru">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://guyru.github.io/calculators/navy-body-fat-calculator.html">
+    <meta property="og:title" content="Navy Body Fat Calculator - Official US Navy Method">
+    <meta property="og:description" content="Calculate body fat percentage using the official US Navy circumference method. Accurate formulas for men and women with metric/imperial units.">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:url" content="https://guyru.github.io/calculators/navy-body-fat-calculator.html">
+    <meta property="twitter:title" content="Navy Body Fat Calculator - Official US Navy Method">
+    <meta property="twitter:description" content="Calculate body fat percentage using the official US Navy circumference method. Accurate formulas for men and women with metric/imperial units.">
+    
+    <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="header">
+            <h1>Navy Body Fat Calculator</h1>
+            <p>Calculate your body fat percentage using the US Navy method</p>
+        </div>
+
+        <form id="calculatorForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" required>
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="units">Units</label>
+                    <select id="units">
+                        <option value="metric">Metric (cm)</option>
+                        <option value="imperial">Imperial (in)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="height">Height</label>
+                <input type="number" id="height" min="120" max="250" step="0.1" required 
+                       aria-describedby="heightUnit" aria-label="Height measurement">
+                <div class="unit-label" id="heightUnit">centimeters</div>
+            </div>
+
+            <div class="form-group">
+                <label for="neck">Neck</label>
+                <input type="number" id="neck" min="20" max="80" step="0.1" required 
+                       aria-describedby="neckUnit" aria-label="Neck circumference measurement">
+                <div class="unit-label" id="neckUnit">centimeters</div>
+            </div>
+
+            <div class="form-group">
+                <label for="waist">Waist</label>
+                <input type="number" id="waist" min="40" max="200" step="0.1" required 
+                       aria-describedby="waistUnit" aria-label="Waist circumference measurement">
+                <div class="unit-label" id="waistUnit">centimeters (at navel level)</div>
+            </div>
+
+            <div class="form-group" id="hipGroup" style="display: none;">
+                <label for="hip">Hip</label>
+                <input type="number" id="hip" min="50" max="200" step="0.1" 
+                       aria-describedby="hipUnit" aria-label="Hip circumference measurement">
+                <div class="unit-label" id="hipUnit">centimeters (at widest point)</div>
+            </div>
+        </form>
+
+        <div id="results" class="results hidden" aria-live="polite" aria-label="Body fat calculation results">
+            <div class="main-result" id="bodyFatPercentage">--.--%</div>
+            <div class="results-text">Body Fat Percentage</div>
+            <div class="category" id="category">--</div>
+        </div>
+
+        <div id="error" class="error" role="alert" aria-live="assertive">
+            Please fill in all required fields with valid values.
+        </div>
+
+        <div class="info-box">
+            <strong>Formulas Used (Original Metric):</strong>
+            <br><br>
+            <strong>Males:</strong><br>
+            Body Fat % = 495 / (1.0324 - 0.19077 × log₁₀(waist_cm - neck_cm) + 0.15456 × log₁₀(height_cm)) - 450
+            <br><br>
+            <strong>Females:</strong><br>
+            Body Fat % = 495 / (1.29579 - 0.35004 × log₁₀(waist_cm + hip_cm - neck_cm) + 0.22100 × log₁₀(height_cm)) - 450
+            <br><br>
+            <strong>Sources:</strong><br>
+            • <a href="https://apps.dtic.mil/sti/citations/ADA143890" target="_blank" rel="noopener noreferrer" style="color: #667eea; text-decoration: underline;">Hodgdon, J.A. and Beckett, M.B. (1984). "Prediction of percent body fat for U.S. Navy men from body circumferences and height." Naval Health Research Center, San Diego, CA.</a><br>
+            • <a href="https://apps.dtic.mil/sti/citations/ADA146456" target="_blank" rel="noopener noreferrer" style="color: #667eea; text-decoration: underline;">Hodgdon, J.A. and Beckett, M.B. (1984). "Prediction of percent body fat for U.S. Navy women from body circumferences and height." Naval Health Research Center, San Diego, CA.</a>
+            <br><br>
+            <strong>Note:</strong> This calculator uses only circumference measurements and height as per the official Navy method. Imperial measurements are automatically converted to metric (centimeters) for calculation.
+        </div>
+
+        <div class="github-links">
+            <a href="index.html">← Back to Calculators</a>
+            <a href="https://github.com/guyru/calculators" target="_blank" rel="noopener noreferrer">View Source</a>
+            <a href="https://github.com/guyru/calculators/issues" target="_blank" rel="noopener noreferrer">Report Issue</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('calculatorForm');
+        const inputs = form.querySelectorAll('input, select');
+        const resultsDiv = document.getElementById('results');
+        const errorDiv = document.getElementById('error');
+        const bodyFatPercentageEl = document.getElementById('bodyFatPercentage');
+        const categoryEl = document.getElementById('category');
+        const genderSelect = document.getElementById('gender');
+        const unitsSelect = document.getElementById('units');
+        const hipGroup = document.getElementById('hipGroup');
+        const hipInput = document.getElementById('hip');
+
+        // Unit elements
+        const heightInput = document.getElementById('height');
+        const neckInput = document.getElementById('neck');
+        const waistInput = document.getElementById('waist');
+        const heightUnit = document.getElementById('heightUnit');
+        const neckUnit = document.getElementById('neckUnit');
+        const waistUnit = document.getElementById('waistUnit');
+        const hipUnit = document.getElementById('hipUnit');
+
+        // Show/hide hip measurement based on gender
+        genderSelect.addEventListener('change', function() {
+            if (this.value === 'female') {
+                hipGroup.style.display = 'block';
+                hipInput.required = true;
+            } else {
+                hipGroup.style.display = 'none';
+                hipInput.required = false;
+                hipInput.value = '';
+            }
+            calculateBodyFat();
+        });
+
+        // Handle unit changes
+        unitsSelect.addEventListener('change', function() {
+            updateUnits();
+            calculateBodyFat();
+        });
+
+        function updateUnits() {
+            const isMetric = unitsSelect.value === 'metric';
+            
+            if (isMetric) {
+                // Metric units
+                heightInput.min = 120;
+                heightInput.max = 250;
+                heightUnit.textContent = 'centimeters';
+                
+                neckInput.min = 20;
+                neckInput.max = 80;
+                neckUnit.textContent = 'centimeters';
+                
+                waistInput.min = 40;
+                waistInput.max = 200;
+                waistUnit.textContent = 'centimeters (at navel level)';
+                
+                hipInput.min = 50;
+                hipInput.max = 200;
+                hipUnit.textContent = 'centimeters (at widest point)';
+            } else {
+                // Imperial units
+                heightInput.min = 48;
+                heightInput.max = 96;
+                heightUnit.textContent = 'inches';
+                
+                neckInput.min = 8;
+                neckInput.max = 30;
+                neckUnit.textContent = 'inches';
+                
+                waistInput.min = 15;
+                waistInput.max = 80;
+                waistUnit.textContent = 'inches (at navel level)';
+                
+                hipInput.min = 20;
+                hipInput.max = 80;
+                hipUnit.textContent = 'inches (at widest point)';
+            }
+        }
+
+        // Add event listeners to all inputs
+        inputs.forEach(input => {
+            input.addEventListener('input', calculateBodyFat);
+            input.addEventListener('change', calculateBodyFat);
+        });
+
+        function inchesToCm(inches) {
+            return inches * 2.54;
+        }
+
+        function calculateBodyFat() {
+            const gender = document.getElementById('gender').value;
+            const units = document.getElementById('units').value;
+            let height = parseFloat(document.getElementById('height').value);
+            let neck = parseFloat(document.getElementById('neck').value);
+            let waist = parseFloat(document.getElementById('waist').value);
+            let hip = parseFloat(document.getElementById('hip').value);
+
+            // Hide results and error initially
+            resultsDiv.classList.add('hidden');
+            errorDiv.style.display = 'none';
+
+            // Validate required fields
+            if (!gender || !height || !neck || !waist) {
+                return;
+            }
+
+            // For females, hip measurement is required
+            if (gender === 'female' && !hip) {
+                return;
+            }
+
+            // Convert imperial to metric for the Navy formula (metric is the base)
+            if (units === 'imperial') {
+                height = inchesToCm(height);
+                neck = inchesToCm(neck);
+                waist = inchesToCm(waist);
+                if (gender === 'female') {
+                    hip = inchesToCm(hip);
+                }
+            }
+
+            // Validate ranges (after conversion to metric)
+            if (height < 120 || height > 250 || 
+                neck < 20 || neck > 80 || 
+                waist < 40 || waist > 200 ||
+                (gender === 'female' && (hip < 50 || hip > 200))) {
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            let bodyFatPercentage;
+
+            if (gender === 'male') {
+                // Navy formula for males (metric version)
+                const density = 1.0324 - 0.19077 * Math.log10(waist - neck) + 0.15456 * Math.log10(height);
+                bodyFatPercentage = (495 / density) - 450;
+            } else {
+                // Navy formula for females (metric version)
+                const density = 1.29579 - 0.35004 * Math.log10(waist + hip - neck) + 0.22100 * Math.log10(height);
+                bodyFatPercentage = (495 / density) - 450;
+            }
+
+            // Ensure the result is valid
+            if (isNaN(bodyFatPercentage) || bodyFatPercentage < 0) {
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Cap at reasonable maximum
+            bodyFatPercentage = Math.min(bodyFatPercentage, 50);
+
+            // Display results
+            bodyFatPercentageEl.textContent = bodyFatPercentage.toFixed(1) + '%';
+            categoryEl.textContent = getBodyFatCategory(bodyFatPercentage, gender);
+            resultsDiv.classList.remove('hidden');
+        }
+
+        function getBodyFatCategory(bodyFat, gender) {
+            if (gender === 'male') {
+                if (bodyFat < 6) return 'Essential Fat';
+                if (bodyFat < 14) return 'Athletes';
+                if (bodyFat < 18) return 'Fitness';
+                if (bodyFat < 25) return 'Average';
+                return 'Obese';
+            } else {
+                if (bodyFat < 14) return 'Essential Fat';
+                if (bodyFat < 21) return 'Athletes';
+                if (bodyFat < 25) return 'Fitness';
+                if (bodyFat < 32) return 'Average';
+                return 'Obese';
+            }
+        }
+
+        // Initialize units on page load
+        updateUnits();
+        
+        // Initial calculation attempt
+        calculateBodyFat();
+    </script>
+</body>
+</html>

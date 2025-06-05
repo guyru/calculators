@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concept2 Watts to Pace Calculator - Rowing Machine Converter</title>
+    <meta name="description" content="Convert between watts and pace for Concept2 rowing machines. Bidirectional real-time conversion using official Concept2 formulas. Perfect for rowers and fitness enthusiasts.">
+    <meta name="keywords" content="concept2 calculator, watts to pace, rowing calculator, concept2 pace, rowing machine, erg calculator, 500m pace">
+    <meta name="author" content="guyru">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://guyru.github.io/calculators/concept2-watts-pace-calculator.html">
+    <meta property="og:title" content="Concept2 Watts to Pace Calculator - Rowing Machine Converter">
+    <meta property="og:description" content="Convert between watts and pace for Concept2 rowing machines. Bidirectional real-time conversion using official Concept2 formulas.">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:url" content="https://guyru.github.io/calculators/concept2-watts-pace-calculator.html">
+    <meta property="twitter:title" content="Concept2 Watts to Pace Calculator - Rowing Machine Converter">
+    <meta property="twitter:description" content="Convert between watts and pace for Concept2 rowing machines. Bidirectional real-time conversion using official Concept2 formulas.">
+    
+    <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="header">
+            <h1>Concept2 Watts ↔ Pace Calculator</h1>
+            <p>Convert between watts and pace for Concept2 rowing machines</p>
+        </div>
+
+        <form id="calculatorForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="watts">Power (Watts)</label>
+                    <input 
+                        type="number" 
+                        id="watts" 
+                        name="watts" 
+                        step="0.1" 
+                        min="1" 
+                        max="2000"
+                        placeholder="Enter watts"
+                        aria-label="Power output in watts"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="paceMinutes">Pace (per 500m)</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input 
+                            type="number" 
+                            id="paceMinutes" 
+                            name="paceMinutes" 
+                            step="1" 
+                            min="0" 
+                            max="59"
+                            placeholder="Min"
+                            style="flex: 1;"
+                            aria-label="Pace minutes"
+                        >
+                        <span style="align-self: center; color: #666;" aria-hidden="true">:</span>
+                        <input 
+                            type="number" 
+                            id="paceSeconds" 
+                            name="paceSeconds" 
+                            step="0.1" 
+                            min="0" 
+                            max="59.9"
+                            placeholder="Sec"
+                            style="flex: 1;"
+                            aria-label="Pace seconds"
+                        >
+                    </div>
+                    <div class="unit-label">Format: MM:SS.s</div>
+                </div>
+            </div>
+
+
+        </form>
+
+        <div id="results" class="results hidden" aria-live="polite" aria-label="Conversion results">
+            <div class="main-result" id="mainResult">Enter watts or pace to see conversion</div>
+        </div>
+
+        <div id="error" class="error" role="alert" aria-live="assertive">
+            Please enter valid values for either watts or pace.
+        </div>
+
+        <div class="info-box">
+            <strong>About Concept2 Conversion:</strong>
+            <p>This calculator uses the official Concept2 conversion formulas for rowing machines. The relationship between watts and pace is based on the physics of rowing resistance.</p>
+            
+            <div class="formula-section">
+                <h4>Conversion Formulas:</h4>
+                <div class="formula">Watts = 2.80 / (pace_seconds/500)³</div>
+                <div class="formula">Pace (seconds) = 500 × ³√(2.80 / watts)</div>
+                <p style="margin-top: 10px; font-size: 0.85rem;">
+                    <strong>Note:</strong> These formulas are specific to Concept2 rowing machines and are based on the drag factor and flywheel physics. Pace is measured as seconds per 500 meters.
+                </p>
+            </div>
+        </div>
+
+        <div class="github-links">
+            <a href="index.html">← Back to Calculators</a>
+            <a href="https://github.com/guyru/calculators" target="_blank" rel="noopener noreferrer">View Source</a>
+            <a href="https://github.com/guyru/calculators/issues" target="_blank" rel="noopener noreferrer">Report Issue</a>
+        </div>
+    </div>
+
+    <script>
+        const wattsInput = document.getElementById('watts');
+        const paceMinutesInput = document.getElementById('paceMinutes');
+        const paceSecondsInput = document.getElementById('paceSeconds');
+        const resultsDiv = document.getElementById('results');
+        const errorDiv = document.getElementById('error');
+        const mainResult = document.getElementById('mainResult');
+
+        let isUpdatingFromWatts = false;
+        let isUpdatingFromPace = false;
+
+        // Convert pace (minutes:seconds) to total seconds
+        function paceToSeconds(minutes, seconds) {
+            return (minutes || 0) * 60 + (seconds || 0);
+        }
+
+        // Convert total seconds to minutes:seconds format
+        function secondsToPace(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return {
+                minutes: minutes,
+                seconds: parseFloat(seconds.toFixed(1))
+            };
+        }
+
+        // Concept2 conversion formulas
+        function wattsFromPace(paceSeconds) {
+            const pacePer500 = paceSeconds / 500;
+            return 2.80 / Math.pow(pacePer500, 3);
+        }
+
+        function paceFromWatts(watts) {
+            return 500 * Math.pow(2.80 / watts, 1/3);
+        }
+
+        // Format pace display
+        function formatPace(totalSeconds) {
+            const pace = secondsToPace(totalSeconds);
+            return `${pace.minutes}:${pace.seconds.toFixed(1).padStart(4, '0')}`;
+        }
+
+        function updateFromWatts() {
+            if (isUpdatingFromPace) return;
+            isUpdatingFromWatts = true;
+
+            const watts = parseFloat(wattsInput.value);
+            
+            if (watts && watts > 0) {
+                const paceSeconds = paceFromWatts(watts);
+                const pace = secondsToPace(paceSeconds);
+                
+                paceMinutesInput.value = pace.minutes;
+                paceSecondsInput.value = pace.seconds.toFixed(1);
+                
+                mainResult.textContent = `${watts} watts → ${formatPace(paceSeconds)} pace`;
+                showResults();
+            } else {
+                hideResults();
+            }
+            
+            isUpdatingFromWatts = false;
+        }
+
+        function updateFromPace() {
+            if (isUpdatingFromWatts) return;
+            isUpdatingFromPace = true;
+
+            const minutes = parseInt(paceMinutesInput.value) || 0;
+            const seconds = parseFloat(paceSecondsInput.value) || 0;
+            const totalSeconds = paceToSeconds(minutes, seconds);
+            
+            if (totalSeconds > 0) {
+                const watts = wattsFromPace(totalSeconds);
+                wattsInput.value = watts.toFixed(1);
+                
+                mainResult.textContent = `${formatPace(totalSeconds)} pace → ${watts.toFixed(1)} watts`;
+                showResults();
+            } else {
+                hideResults();
+            }
+            
+            isUpdatingFromPace = false;
+        }
+
+        function showResults() {
+            resultsDiv.classList.remove('hidden');
+            errorDiv.style.display = 'none';
+        }
+
+        function hideResults() {
+            resultsDiv.classList.add('hidden');
+            errorDiv.style.display = 'none';
+        }
+
+        function showError() {
+            resultsDiv.classList.add('hidden');
+            errorDiv.style.display = 'block';
+        }
+
+        // Event listeners
+        wattsInput.addEventListener('input', updateFromWatts);
+        paceMinutesInput.addEventListener('input', updateFromPace);
+        paceSecondsInput.addEventListener('input', updateFromPace);
+
+        // Unit tests for calculator logic
+        function runUnitTests() {
+            const testVectors = [
+                // Watts -> Pace tests
+                { watts: 200, expectedPace: 120.5 }, // 2:00.5
+                { watts: 300, expectedPace: 105.3 }, // 1:45.3
+                { watts: 400, expectedPace: 95.6 },  // 1:35.6
+                
+                // Pace -> Watts tests (reverse calculations)
+                { pace: 120.0, expectedWatts: 202.5 }, // 2:00.0 -> 202.5W
+                { pace: 105.0, expectedWatts: 302.3 }, // 1:45.0 -> 302.3W
+                { pace: 90.0, expectedWatts: 480.1 }   // 1:30.0 -> 480.1W
+            ];
+
+            console.log('Running Concept2 calculator unit tests...');
+            let passedTests = 0;
+            let totalTests = 0;
+
+            // Test watts to pace conversions
+            testVectors.slice(0, 3).forEach((test, index) => {
+                totalTests++;
+                const actualPace = paceFromWatts(test.watts);
+                const tolerance = 0.5; // Allow 0.5 second tolerance
+                const passed = Math.abs(actualPace - test.expectedPace) <= tolerance;
+                
+                if (passed) passedTests++;
+                console.log(`Test ${index + 1} - Watts→Pace: ${test.watts}W → ${actualPace.toFixed(1)}s (expected: ${test.expectedPace}s) ${passed ? '✓' : '✗'}`);
+            });
+
+            // Test pace to watts conversions
+            testVectors.slice(3).forEach((test, index) => {
+                totalTests++;
+                const actualWatts = wattsFromPace(test.pace);
+                const tolerance = 5.0; // Allow 5W tolerance
+                const passed = Math.abs(actualWatts - test.expectedWatts) <= tolerance;
+                
+                if (passed) passedTests++;
+                console.log(`Test ${index + 4} - Pace→Watts: ${test.pace}s → ${actualWatts.toFixed(1)}W (expected: ${test.expectedWatts}W) ${passed ? '✓' : '✗'}`);
+            });
+
+            console.log(`Unit tests completed: ${passedTests}/${totalTests} passed`);
+            return passedTests === totalTests;
+        }
+
+        // Run unit tests on page load
+        runUnitTests();
+
+        // Initialize with example values
+        wattsInput.value = '250';
+        updateFromWatts();
+    </script>
+</body>
+</html>
