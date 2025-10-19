@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Army Body Fat Calculator - Official US Army Single-Site Method</title>
+    <meta name="description" content="Calculate body fat percentage using the official US Army single-site abdominal circumference method. Simple and accurate formulas for men and women with metric/imperial units. Based on ALARACT 032/2025.">
+    <meta name="keywords" content="army body fat calculator, body fat percentage, abdominal circumference, single-site method, army fitness, body composition, ALARACT 032/2025">
+    <meta name="author" content="guyru">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://guyru.github.io/calculators/army-body-fat-calculator.html">
+    <meta property="og:title" content="Army Body Fat Calculator - Official US Army Single-Site Method">
+    <meta property="og:description" content="Calculate body fat percentage using the official US Army single-site abdominal circumference method. Simple and accurate formulas for men and women with metric/imperial units.">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:url" content="https://guyru.github.io/calculators/army-body-fat-calculator.html">
+    <meta property="twitter:title" content="Army Body Fat Calculator - Official US Army Single-Site Method">
+    <meta property="twitter:description" content="Calculate body fat percentage using the official US Army single-site abdominal circumference method. Simple and accurate formulas for men and women with metric/imperial units.">
+
+    <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="header">
+            <h1>Army Body Fat Calculator</h1>
+            <p>Calculate your body fat percentage using the US Army single-site method</p>
+        </div>
+
+        <form id="calculatorForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" required>
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="units">Units</label>
+                    <select id="units">
+                        <option value="metric">Metric</option>
+                        <option value="imperial">Imperial</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="weight">Body Weight</label>
+                <input type="number" id="weight" min="30" max="300" step="0.1" required
+                       aria-describedby="weightUnit" aria-label="Body weight measurement">
+                <div class="unit-label" id="weightUnit">kilograms</div>
+            </div>
+
+            <div class="form-group">
+                <label for="abdomen">Abdominal Circumference</label>
+                <input type="number" id="abdomen" min="40" max="200" step="0.1" required
+                       aria-describedby="abdomenUnit" aria-label="Abdominal circumference measurement">
+                <div class="unit-label" id="abdomenUnit">centimeters (at navel level)</div>
+            </div>
+        </form>
+
+        <div id="results" class="results hidden" aria-live="polite" aria-label="Body fat calculation results">
+            <div class="main-result" id="bodyFatPercentage">--.--%</div>
+            <div class="results-text">Body Fat Percentage</div>
+            <div class="category" id="category">--</div>
+        </div>
+
+        <div id="error" class="error" role="alert" aria-live="assertive">
+            Please fill in all required fields with valid values.
+        </div>
+
+        <div class="info-box">
+            <strong>Formulas Used:</strong>
+            <br><br>
+            <strong>Males:</strong><br>
+            Body Fat % = -26.97 - (0.12 × body weight in pounds) + (1.99 × abdomen circumference in inches)
+            <br><br>
+            <strong>Females:</strong><br>
+            Body Fat % = -9.15 - (0.015 × body weight in pounds) + (1.27 × abdomen circumference in inches)
+            <br><br>
+            <strong>Measurement Instructions:</strong><br>
+            Measure abdominal circumference against the skin at the navel (belly button) level and parallel to the floor.
+            <br><br>
+            <strong>Source:</strong><br>
+            • <a href="https://armypubs.army.mil/epubs/DR_pubs/DR_a/ARN43352-ALARACT_0322025-000-WEB-1.pdf" target="_blank" rel="noopener noreferrer">ALARACT 032/2025 - Army Body Composition Program Update</a>
+            <br><br>
+            <strong>Note:</strong> This calculator uses the new Army single-site measurement method effective 2025. For comparison, see the <a href="navy-body-fat-calculator.html">Navy Body Fat Calculator</a> which uses a different multi-site circumference method.
+        </div>
+
+        <div class="github-links">
+            <a href="index.html" aria-label="Back to calculators index">← Back to Calculators</a>
+            <a href="https://github.com/guyru/calculators" target="_blank" rel="noopener noreferrer">View Source</a>
+            <a href="https://github.com/guyru/calculators/issues" target="_blank" rel="noopener noreferrer">Report Issue</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('calculatorForm');
+        const inputs = form.querySelectorAll('input, select');
+        const resultsDiv = document.getElementById('results');
+        const errorDiv = document.getElementById('error');
+        const bodyFatPercentageEl = document.getElementById('bodyFatPercentage');
+        const categoryEl = document.getElementById('category');
+        const unitsSelect = document.getElementById('units');
+
+        // Unit elements
+        const weightInput = document.getElementById('weight');
+        const abdomenInput = document.getElementById('abdomen');
+        const weightUnit = document.getElementById('weightUnit');
+        const abdomenUnit = document.getElementById('abdomenUnit');
+
+        // Handle unit changes
+        unitsSelect.addEventListener('change', function() {
+            updateUnits();
+            calculateBodyFat();
+        });
+
+        function updateUnits() {
+            const isMetric = unitsSelect.value === 'metric';
+
+            if (isMetric) {
+                // Metric units
+                weightInput.min = 30;
+                weightInput.max = 300;
+                weightUnit.textContent = 'kilograms';
+
+                abdomenInput.min = 40;
+                abdomenInput.max = 200;
+                abdomenUnit.textContent = 'centimeters (at navel level)';
+            } else {
+                // Imperial units
+                weightInput.min = 65;
+                weightInput.max = 660;
+                weightUnit.textContent = 'pounds';
+
+                abdomenInput.min = 15;
+                abdomenInput.max = 80;
+                abdomenUnit.textContent = 'inches (at navel level)';
+            }
+        }
+
+        // Add event listeners to all inputs
+        inputs.forEach(input => {
+            input.addEventListener('input', calculateBodyFat);
+            input.addEventListener('change', calculateBodyFat);
+        });
+
+        function poundsToKg(pounds) {
+            return pounds * 0.453592;
+        }
+
+        function kgToPounds(kg) {
+            return kg * 2.204623;
+        }
+
+        function inchesToCm(inches) {
+            return inches * 2.54;
+        }
+
+        function cmToInches(cm) {
+            return cm / 2.54;
+        }
+
+        function calculateBodyFat() {
+            const gender = document.getElementById('gender').value;
+            const units = document.getElementById('units').value;
+            let weight = parseFloat(document.getElementById('weight').value);
+            let abdomen = parseFloat(document.getElementById('abdomen').value);
+
+            // Hide results and error initially
+            resultsDiv.classList.add('hidden');
+            errorDiv.style.display = 'none';
+
+            // Validate required fields
+            if (!gender || !weight || !abdomen) {
+                return;
+            }
+
+            // Convert to imperial units for the Army formula (formulas are in pounds and inches)
+            let weightInPounds, abdomenInInches;
+
+            if (units === 'metric') {
+                weightInPounds = kgToPounds(weight);
+                abdomenInInches = cmToInches(abdomen);
+            } else {
+                weightInPounds = weight;
+                abdomenInInches = abdomen;
+            }
+
+            // Validate ranges (check original units before conversion)
+            if (units === 'metric') {
+                if (weight < 30 || weight > 300 || abdomen < 40 || abdomen > 200) {
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+            } else {
+                if (weight < 65 || weight > 660 || abdomen < 15 || abdomen > 80) {
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+            }
+
+            let bodyFatPercentage;
+
+            if (gender === 'male') {
+                // Army formula for males
+                bodyFatPercentage = -26.97 - (0.12 * weightInPounds) + (1.99 * abdomenInInches);
+            } else {
+                // Army formula for females
+                bodyFatPercentage = -9.15 - (0.015 * weightInPounds) + (1.27 * abdomenInInches);
+            }
+
+            // Ensure the result is valid and within reasonable bounds
+            if (isNaN(bodyFatPercentage) || bodyFatPercentage < 0) {
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Cap at reasonable maximum
+            bodyFatPercentage = Math.min(bodyFatPercentage, 50);
+
+            // Display results
+            bodyFatPercentageEl.textContent = bodyFatPercentage.toFixed(1) + '%';
+            categoryEl.textContent = getBodyFatCategory(bodyFatPercentage, gender);
+            resultsDiv.classList.remove('hidden');
+        }
+
+        function getBodyFatCategory(bodyFat, gender) {
+            if (gender === 'male') {
+                if (bodyFat < 6) return 'Essential Fat';
+                if (bodyFat < 14) return 'Athletes';
+                if (bodyFat < 18) return 'Fitness';
+                if (bodyFat < 25) return 'Average';
+                return 'Obese';
+            } else {
+                if (bodyFat < 14) return 'Essential Fat';
+                if (bodyFat < 21) return 'Athletes';
+                if (bodyFat < 25) return 'Fitness';
+                if (bodyFat < 32) return 'Average';
+                return 'Obese';
+            }
+        }
+
+        // Initialize units on page load
+        updateUnits();
+
+        // Initial calculation attempt
+        calculateBodyFat();
+    </script>
+</body>
+</html>

@@ -7,6 +7,9 @@ A collection of useful calculators built with vanilla HTML, CSS, and JavaScript.
 ### Navy Body Fat Calculator
 Calculate your body fat percentage using the official US Navy method based on body circumference measurements.
 
+### Army Body Fat Calculator
+Calculate your body fat percentage using the official US Army single-site abdominal circumference method.
+
 ### Concept2 Watts ↔ Pace Calculator
 Convert between power output (watts) and pace for Concept2 rowing machines with bidirectional real-time conversion.
 
