@@ -7,119 +7,123 @@
     <meta name="description" content="Digital compass using device orientation sensors. Real-time heading display with cardinal directions. Works on mobile devices with magnetometer support.">
     <meta name="keywords" content="digital compass, mobile compass, device orientation, magnetometer, heading, cardinal directions, navigation">
     <meta name="author" content="guyru">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://guyru.github.io/calculators/digital-compass.html">
     <meta property="og:title" content="Digital Compass - Real-time Mobile Orientation">
     <meta property="og:description" content="Digital compass using device orientation sensors. Real-time heading display with cardinal directions for mobile devices.">
-    
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary">
     <meta property="twitter:url" content="https://guyru.github.io/calculators/digital-compass.html">
     <meta property="twitter:title" content="Digital Compass - Real-time Mobile Orientation">
     <meta property="twitter:description" content="Digital compass using device orientation sensors. Real-time heading display with cardinal directions for mobile devices.">
-    
+
     <link rel="stylesheet" href="shared.css">
     <style>
         .compass-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 20px 0;
+            margin: var(--spacing-md) 0;
         }
-        
+
         .heading-display {
             text-align: center;
-            margin: 20px 0;
+            margin: var(--spacing-md) 0;
         }
-        
+
         .heading-value {
             font-size: 3rem;
-            font-weight: bold;
-            color: #2c3e50;
-            margin: 10px 0;
+            font-weight: 700;
+            color: var(--color-text);
+            margin: var(--spacing-xs) 0;
+            letter-spacing: -0.025em;
         }
-        
+
         .heading-label {
-            font-size: 1.2rem;
-            color: #666;
-            margin-bottom: 10px;
+            font-size: 1rem;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-xs);
+            font-weight: 500;
         }
-        
+
         .cardinal-direction {
             font-size: 1.5rem;
-            font-weight: bold;
-            color: #e74c3c;
-            margin-top: 10px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-top: var(--spacing-xs);
         }
-        
+
         .status-display {
             text-align: center;
-            margin: 20px 0;
-            padding: 15px;
-            border-radius: 8px;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
+            margin: var(--spacing-md) 0;
+            padding: var(--spacing-sm);
+            border-radius: var(--radius-md);
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            font-size: 0.9375rem;
         }
-        
+
         .status-display.error {
-            background: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
+            background: #fee2e2;
+            border-color: #fecaca;
+            color: #991b1b;
         }
-        
+
         .status-display.success {
-            background: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
+            background: #d1fae5;
+            border-color: #a7f3d0;
+            color: #065f46;
         }
-        
+
         .accuracy-indicator {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin: 10px 0;
+            gap: var(--spacing-xs);
+            margin: var(--spacing-xs) 0;
         }
-        
+
         .accuracy-dots {
             display: flex;
-            gap: 5px;
+            gap: 0.375rem;
         }
-        
+
         .accuracy-dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            background: #dee2e6;
-            transition: background-color 0.3s ease;
+            background: var(--color-border);
+            transition: background-color 0.15s ease;
         }
-        
+
         .accuracy-dot.active {
-            background: #28a745;
+            background: var(--color-success);
         }
-        
+
         @media (max-width: 768px) {
             .heading-value {
                 font-size: 2.5rem;
             }
         }
-        
+
         .permission-button {
-            background: #28a745;
+            background: var(--color-primary);
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 8px;
+            padding: 0.875rem 1.75rem;
+            border-radius: var(--radius-md);
             cursor: pointer;
-            font-size: 1.1rem;
-            transition: background-color 0.2s ease;
-            margin: 20px 0;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.15s ease;
+            margin: var(--spacing-md) 0;
         }
-        
+
         .permission-button:hover {
-            background: #218838;
+            background: var(--color-primary-hover);
         }
     </style>
 </head>
@@ -170,21 +174,21 @@
                 this.accuracy = 0;
                 this.isSupported = false;
                 this.isPermissionGranted = false;
-                
+
                 this.headingValue = document.getElementById('headingValue');
                 this.cardinalDirection = document.getElementById('cardinalDirection');
                 this.statusDisplay = document.getElementById('statusDisplay');
                 this.statusMessage = document.getElementById('statusMessage');
                 this.permissionButton = document.getElementById('permissionButton');
-                
+
                 this.init();
             }
-            
+
             init() {
                 this.checkDeviceSupport();
                 this.setupEventListeners();
             }
-            
+
             checkDeviceSupport() {
                 if (typeof DeviceOrientationEvent !== 'undefined') {
                     if (typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -196,13 +200,13 @@
                     this.showError('Device orientation not supported. This feature requires a mobile device with magnetometer.');
                 }
             }
-            
+
             showPermissionButton() {
                 this.statusMessage.textContent = 'This compass requires access to device orientation sensors.';
                 this.permissionButton.style.display = 'inline-block';
                 this.statusDisplay.className = 'status-display';
             }
-            
+
             async requestPermission() {
                 try {
                     const permission = await DeviceOrientationEvent.requestPermission();
@@ -217,32 +221,32 @@
                     this.showError('Failed to request device orientation permission.');
                 }
             }
-            
+
             startCompass() {
                 this.isSupported = true;
                 this.statusMessage.textContent = 'Compass active. Hold device flat for best accuracy.';
                 this.statusDisplay.className = 'status-display success';
-                
+
                 this.setupOrientationListeners();
             }
-            
+
             setupOrientationListeners() {
                 let testHandlerTriggered = false;
-                
+
                 const testHandler = (event) => {
                     testHandlerTriggered = true;
-                    
+
                     window.removeEventListener('deviceorientationabsolute', testHandler);
-                    
+
                     if (event.absolute === true || event.webkitCompassHeading !== undefined) {
                         window.addEventListener('deviceorientationabsolute', this.handleOrientation.bind(this));
                     } else {
                         window.addEventListener('deviceorientation', this.handleOrientation.bind(this));
                     }
                 };
-                
+
                 window.addEventListener('deviceorientationabsolute', testHandler);
-                
+
                 setTimeout(() => {
                     if (!testHandlerTriggered) {
                         window.removeEventListener('deviceorientationabsolute', testHandler);
@@ -250,58 +254,58 @@
                     }
                 }, 1000);
             }
-            
+
             handleOrientation(event) {
                 let rawHeading = null;
                 let headingSource = 'unknown';
-                
+
                 if (event.webkitCompassHeading !== undefined && event.webkitCompassHeading !== null) {
                     rawHeading = event.webkitCompassHeading;
                     headingSource = 'webkit';
-                    
+
                     if (event.webkitCompassAccuracy !== undefined) {
                         this.updateWebkitAccuracy(event.webkitCompassAccuracy);
                     }
-                } 
+                }
                 else if (event.alpha !== null && event.alpha !== undefined) {
                     rawHeading = 360 - event.alpha;
                     headingSource = 'alpha';
-                    
+
                     this.updateAlphaAccuracy(event);
                 }
-                
+
                 if (rawHeading !== null) {
                     let heading = this.normalizeHeading(rawHeading);
-                    
+
                     if (this.shouldSkipUpdate(heading)) return;
-                    
+
                     this.updateDisplay(heading);
                 } else {
                     this.showError('Unable to get compass heading. Device may not have a magnetometer.');
                 }
             }
-            
+
             normalizeHeading(heading) {
                 return ((heading % 360) + 360) % 360;
             }
-            
+
             shouldSkipUpdate(newHeading) {
                 if (this.currentHeading === 0) return false;
-                
+
                 let diff = Math.abs(newHeading - this.currentHeading);
                 if (diff > 180) diff = 360 - diff;
-                
+
                 return diff < 0.5;
             }
-            
+
             updateDisplay(heading) {
                 this.currentHeading = heading;
-                
+
                 this.headingValue.textContent = `${Math.round(heading)}°`;
-                
+
                 this.cardinalDirection.textContent = this.getCardinalDirection(heading);
             }
-            
+
             getCardinalDirection(heading) {
                 const directions = [
                     'N', 'NNE', 'NE', 'ENE',
@@ -309,36 +313,36 @@
                     'S', 'SSW', 'SW', 'WSW',
                     'W', 'WNW', 'NW', 'NNW'
                 ];
-                
+
                 const index = Math.round(heading / 22.5) % 16;
                 return directions[index];
             }
-            
+
             updateWebkitAccuracy(webkitAccuracy) {
                 let accuracyLevel = 1;
                 if (webkitAccuracy >= 15) accuracyLevel = 5;
                 else if (webkitAccuracy >= 10) accuracyLevel = 4;
                 else if (webkitAccuracy >= 5) accuracyLevel = 3;
                 else if (webkitAccuracy >= 0) accuracyLevel = 2;
-                
+
                 this.accuracy = accuracyLevel;
                 this.updateAccuracyDisplay();
             }
-            
+
             updateAlphaAccuracy(event) {
                 let accuracyLevel = 0;
-                
+
                 if (event.alpha !== null) accuracyLevel++;
                 if (event.beta !== null) accuracyLevel++;
                 if (event.gamma !== null) accuracyLevel++;
                 if (event.absolute) accuracyLevel++;
-                
+
                 if (event.beta !== null && Math.abs(event.beta) < 30) accuracyLevel++;
-                
+
                 this.accuracy = Math.max(0, Math.min(5, accuracyLevel));
                 this.updateAccuracyDisplay();
             }
-            
+
             updateAccuracyDisplay() {
                 const dots = document.querySelectorAll('.accuracy-dot');
                 dots.forEach((dot, index) => {
@@ -349,20 +353,20 @@
                     }
                 });
             }
-            
+
             showError(message) {
                 this.statusMessage.textContent = message;
                 this.statusDisplay.className = 'status-display error';
                 this.permissionButton.style.display = 'none';
             }
-            
+
             setupEventListeners() {
                 this.permissionButton.addEventListener('click', () => {
                     this.requestPermission();
                 });
             }
         }
-        
+
         // Initialize compass when page loads
         document.addEventListener('DOMContentLoaded', () => {
             new DigitalCompass();

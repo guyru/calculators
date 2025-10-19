@@ -7,19 +7,19 @@
     <meta name="description" content="Convert between watts and pace for Concept2 rowing machines. Bidirectional real-time conversion using official Concept2 formulas. Perfect for rowers and fitness enthusiasts.">
     <meta name="keywords" content="concept2 calculator, watts to pace, rowing calculator, concept2 pace, rowing machine, erg calculator, 500m pace">
     <meta name="author" content="guyru">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://guyru.github.io/calculators/concept2-watts-pace-calculator.html">
     <meta property="og:title" content="Concept2 Watts to Pace Calculator - Rowing Machine Converter">
     <meta property="og:description" content="Convert between watts and pace for Concept2 rowing machines. Bidirectional real-time conversion using official Concept2 formulas.">
-    
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary">
     <meta property="twitter:url" content="https://guyru.github.io/calculators/concept2-watts-pace-calculator.html">
     <meta property="twitter:title" content="Concept2 Watts to Pace Calculator - Rowing Machine Converter">
     <meta property="twitter:description" content="Convert between watts and pace for Concept2 rowing machines. Bidirectional real-time conversion using official Concept2 formulas.">
-    
+
     <link rel="stylesheet" href="shared.css">
 </head>
 <body>
@@ -33,12 +33,12 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="watts">Power (Watts)</label>
-                    <input 
-                        type="number" 
-                        id="watts" 
-                        name="watts" 
-                        step="0.1" 
-                        min="1" 
+                    <input
+                        type="number"
+                        id="watts"
+                        name="watts"
+                        step="0.1"
+                        min="1"
                         max="2000"
                         placeholder="Enter watts"
                         aria-label="Power output in watts"
@@ -47,24 +47,24 @@
                 <div class="form-group">
                     <label for="paceMinutes">Pace (per 500m)</label>
                     <div style="display: flex; gap: 5px;">
-                        <input 
-                            type="number" 
-                            id="paceMinutes" 
-                            name="paceMinutes" 
-                            step="1" 
-                            min="0" 
+                        <input
+                            type="number"
+                            id="paceMinutes"
+                            name="paceMinutes"
+                            step="1"
+                            min="0"
                             max="59"
                             placeholder="Min"
                             style="flex: 1;"
                             aria-label="Pace minutes"
                         >
                         <span style="align-self: center; color: #666;" aria-hidden="true">:</span>
-                        <input 
-                            type="number" 
-                            id="paceSeconds" 
-                            name="paceSeconds" 
-                            step="0.1" 
-                            min="0" 
+                        <input
+                            type="number"
+                            id="paceSeconds"
+                            name="paceSeconds"
+                            step="0.1"
+                            min="0"
                             max="59.9"
                             placeholder="Sec"
                             style="flex: 1;"
@@ -89,7 +89,7 @@
         <div class="info-box">
             <strong>About Concept2 Conversion:</strong>
             <p>This calculator uses the official Concept2 conversion formulas for rowing machines. The relationship between watts and pace is based on the physics of rowing resistance.</p>
-            
+
             <div class="formula-section">
                 <h4>Conversion Formulas:</h4>
                 <div class="formula">Watts = 2.80 / (pace_seconds/500)³</div>
@@ -154,20 +154,20 @@
             isUpdatingFromWatts = true;
 
             const watts = parseFloat(wattsInput.value);
-            
+
             if (watts && watts > 0) {
                 const paceSeconds = paceFromWatts(watts);
                 const pace = secondsToPace(paceSeconds);
-                
+
                 paceMinutesInput.value = pace.minutes;
                 paceSecondsInput.value = pace.seconds.toFixed(1);
-                
+
                 mainResult.textContent = `${watts} watts → ${formatPace(paceSeconds)} pace`;
                 showResults();
             } else {
                 hideResults();
             }
-            
+
             isUpdatingFromWatts = false;
         }
 
@@ -178,17 +178,17 @@
             const minutes = parseInt(paceMinutesInput.value) || 0;
             const seconds = parseFloat(paceSecondsInput.value) || 0;
             const totalSeconds = paceToSeconds(minutes, seconds);
-            
+
             if (totalSeconds > 0) {
                 const watts = wattsFromPace(totalSeconds);
                 wattsInput.value = watts.toFixed(1);
-                
+
                 mainResult.textContent = `${formatPace(totalSeconds)} pace → ${watts.toFixed(1)} watts`;
                 showResults();
             } else {
                 hideResults();
             }
-            
+
             isUpdatingFromPace = false;
         }
 
@@ -219,7 +219,7 @@
                 { watts: 200, expectedPace: 120.5 }, // 2:00.5
                 { watts: 300, expectedPace: 105.3 }, // 1:45.3
                 { watts: 400, expectedPace: 95.6 },  // 1:35.6
-                
+
                 // Pace -> Watts tests (reverse calculations)
                 { pace: 120.0, expectedWatts: 202.5 }, // 2:00.0 -> 202.5W
                 { pace: 105.0, expectedWatts: 302.3 }, // 1:45.0 -> 302.3W
@@ -236,7 +236,7 @@
                 const actualPace = paceFromWatts(test.watts);
                 const tolerance = 0.5; // Allow 0.5 second tolerance
                 const passed = Math.abs(actualPace - test.expectedPace) <= tolerance;
-                
+
                 if (passed) passedTests++;
                 console.log(`Test ${index + 1} - Watts→Pace: ${test.watts}W → ${actualPace.toFixed(1)}s (expected: ${test.expectedPace}s) ${passed ? '✓' : '✗'}`);
             });
@@ -247,7 +247,7 @@
                 const actualWatts = wattsFromPace(test.pace);
                 const tolerance = 5.0; // Allow 5W tolerance
                 const passed = Math.abs(actualWatts - test.expectedWatts) <= tolerance;
-                
+
                 if (passed) passedTests++;
                 console.log(`Test ${index + 4} - Pace→Watts: ${test.pace}s → ${actualWatts.toFixed(1)}W (expected: ${test.expectedWatts}W) ${passed ? '✓' : '✗'}`);
             });

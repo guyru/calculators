@@ -7,19 +7,19 @@
     <meta name="description" content="Calculate body fat percentage using the official US Navy circumference method. Accurate formulas for men and women with metric/imperial units. Based on research papers ADA143890 and ADA146456.">
     <meta name="keywords" content="navy body fat calculator, body fat percentage, circumference method, naval health research, body composition, fitness calculator">
     <meta name="author" content="guyru">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://guyru.github.io/calculators/navy-body-fat-calculator.html">
     <meta property="og:title" content="Navy Body Fat Calculator - Official US Navy Method">
     <meta property="og:description" content="Calculate body fat percentage using the official US Navy circumference method. Accurate formulas for men and women with metric/imperial units.">
-    
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary">
     <meta property="twitter:url" content="https://guyru.github.io/calculators/navy-body-fat-calculator.html">
     <meta property="twitter:title" content="Navy Body Fat Calculator - Official US Navy Method">
     <meta property="twitter:description" content="Calculate body fat percentage using the official US Navy circumference method. Accurate formulas for men and women with metric/imperial units.">
-    
+
     <link rel="stylesheet" href="shared.css">
 </head>
 <body>
@@ -50,28 +50,28 @@
 
             <div class="form-group">
                 <label for="height">Height</label>
-                <input type="number" id="height" min="120" max="250" step="0.1" required 
+                <input type="number" id="height" min="120" max="250" step="0.1" required
                        aria-describedby="heightUnit" aria-label="Height measurement">
                 <div class="unit-label" id="heightUnit">centimeters</div>
             </div>
 
             <div class="form-group">
                 <label for="neck">Neck</label>
-                <input type="number" id="neck" min="20" max="80" step="0.1" required 
+                <input type="number" id="neck" min="20" max="80" step="0.1" required
                        aria-describedby="neckUnit" aria-label="Neck circumference measurement">
                 <div class="unit-label" id="neckUnit">centimeters</div>
             </div>
 
             <div class="form-group">
                 <label for="waist">Waist</label>
-                <input type="number" id="waist" min="40" max="200" step="0.1" required 
+                <input type="number" id="waist" min="40" max="200" step="0.1" required
                        aria-describedby="waistUnit" aria-label="Waist circumference measurement">
                 <div class="unit-label" id="waistUnit">centimeters (at navel level)</div>
             </div>
 
             <div class="form-group" id="hipGroup" style="display: none;">
                 <label for="hip">Hip</label>
-                <input type="number" id="hip" min="50" max="200" step="0.1" 
+                <input type="number" id="hip" min="50" max="200" step="0.1"
                        aria-describedby="hipUnit" aria-label="Hip circumference measurement">
                 <div class="unit-label" id="hipUnit">centimeters (at widest point)</div>
             </div>
@@ -97,8 +97,8 @@
             Body Fat % = 495 / (1.29579 - 0.35004 × log₁₀(waist_cm + hip_cm - neck_cm) + 0.22100 × log₁₀(height_cm)) - 450
             <br><br>
             <strong>Sources:</strong><br>
-            • <a href="https://apps.dtic.mil/sti/citations/ADA143890" target="_blank" rel="noopener noreferrer" style="color: #667eea; text-decoration: underline;">Hodgdon, J.A. and Beckett, M.B. (1984). "Prediction of percent body fat for U.S. Navy men from body circumferences and height." Naval Health Research Center, San Diego, CA.</a><br>
-            • <a href="https://apps.dtic.mil/sti/citations/ADA146456" target="_blank" rel="noopener noreferrer" style="color: #667eea; text-decoration: underline;">Hodgdon, J.A. and Beckett, M.B. (1984). "Prediction of percent body fat for U.S. Navy women from body circumferences and height." Naval Health Research Center, San Diego, CA.</a>
+            • <a href="https://apps.dtic.mil/sti/citations/ADA143890" target="_blank" rel="noopener noreferrer">Hodgdon, J.A. and Beckett, M.B. (1984). "Prediction of percent body fat for U.S. Navy men from body circumferences and height." Naval Health Research Center, San Diego, CA.</a><br>
+            • <a href="https://apps.dtic.mil/sti/citations/ADA146456" target="_blank" rel="noopener noreferrer">Hodgdon, J.A. and Beckett, M.B. (1984). "Prediction of percent body fat for U.S. Navy women from body circumferences and height." Naval Health Research Center, San Diego, CA.</a>
             <br><br>
             <strong>Note:</strong> This calculator uses only circumference measurements and height as per the official Navy method. Imperial measurements are automatically converted to metric (centimeters) for calculation.
         </div>
@@ -152,21 +152,21 @@
 
         function updateUnits() {
             const isMetric = unitsSelect.value === 'metric';
-            
+
             if (isMetric) {
                 // Metric units
                 heightInput.min = 120;
                 heightInput.max = 250;
                 heightUnit.textContent = 'centimeters';
-                
+
                 neckInput.min = 20;
                 neckInput.max = 80;
                 neckUnit.textContent = 'centimeters';
-                
+
                 waistInput.min = 40;
                 waistInput.max = 200;
                 waistUnit.textContent = 'centimeters (at navel level)';
-                
+
                 hipInput.min = 50;
                 hipInput.max = 200;
                 hipUnit.textContent = 'centimeters (at widest point)';
@@ -175,15 +175,15 @@
                 heightInput.min = 48;
                 heightInput.max = 96;
                 heightUnit.textContent = 'inches';
-                
+
                 neckInput.min = 8;
                 neckInput.max = 30;
                 neckUnit.textContent = 'inches';
-                
+
                 waistInput.min = 15;
                 waistInput.max = 80;
                 waistUnit.textContent = 'inches (at navel level)';
-                
+
                 hipInput.min = 20;
                 hipInput.max = 80;
                 hipUnit.textContent = 'inches (at widest point)';
@@ -233,8 +233,8 @@
             }
 
             // Validate ranges (after conversion to metric)
-            if (height < 120 || height > 250 || 
-                neck < 20 || neck > 80 || 
+            if (height < 120 || height > 250 ||
+                neck < 20 || neck > 80 ||
                 waist < 40 || waist > 200 ||
                 (gender === 'female' && (hip < 50 || hip > 200))) {
                 errorDiv.style.display = 'block';
@@ -286,7 +286,7 @@
 
         // Initialize units on page load
         updateUnits();
-        
+
         // Initial calculation attempt
         calculateBodyFat();
     </script>
