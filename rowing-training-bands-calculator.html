@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rowing Training Bands Calculator - Heart Rate & Power Zones</title>
+    <meta name="description" content="Calculate personalized rowing training zones based on your max heart rate, resting heart rate, and 2000m erg time. Get precise heart rate ranges, pace targets, and power zones for optimal training.">
+    <meta name="keywords" content="rowing training zones, heart rate zones, rowing calculator, erg training, 2k pace, rowing power zones, Karvonen method, concept2 training">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Rowing Training Bands Calculator">
+    <meta property="og:description" content="Calculate personalized rowing training zones based on your max heart rate, resting heart rate, and 2000m erg time.">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Rowing Training Bands Calculator">
+    <meta name="twitter:description" content="Calculate personalized rowing training zones based on your max heart rate, resting heart rate, and 2000m erg time.">
+
+    <link rel="canonical" href="https://guyru.github.io/calculators/rowing-training-bands-calculator.html">
+    <link rel="stylesheet" href="shared.css">
+
+    <style>
+        .input-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .form-row {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .form-row > * {
+            flex: 1;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border: 2px solid var(--color-border);
+            background: var(--color-surface);
+            color: var(--color-text);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.15s ease;
+        }
+
+        .toggle-btn:hover {
+            border-color: var(--color-primary);
+        }
+
+        .toggle-btn.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .pace-inputs {
+            display: flex;
+            gap: var(--spacing-xs);
+            align-items: center;
+        }
+
+        .pace-inputs input {
+            width: 4rem;
+        }
+
+        .pace-inputs input#paceSec {
+            width: 5rem;
+        }
+
+        .pace-separator {
+            font-weight: 600;
+            color: var(--color-text-secondary);
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: var(--spacing-lg);
+            background: var(--color-surface);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: var(--spacing-sm);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .results-table th {
+            background: var(--color-bg);
+            font-weight: 600;
+            color: var(--color-text);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .results-table td {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .results-table tbody tr:hover {
+            background: var(--color-bg);
+        }
+
+        .zone-name {
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .zone-description {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            display: block;
+            margin-top: 0.25rem;
+        }
+
+        .info-box {
+            background: var(--color-bg);
+            border-left: 4px solid var(--color-primary);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            margin-top: var(--spacing-lg);
+        }
+
+        .info-box h3 {
+            margin: 0 0 var(--spacing-sm) 0;
+            font-size: 1rem;
+            color: var(--color-text);
+        }
+
+        .info-box p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            .form-row {
+                flex-direction: column;
+                gap: var(--spacing-sm);
+            }
+
+            .results-table {
+                font-size: 0.875rem;
+            }
+
+            .results-table th,
+            .results-table td {
+                padding: var(--spacing-xs);
+            }
+
+            /* Hide HRR% column on mobile */
+            .results-table th:nth-child(3),
+            .results-table td:nth-child(3) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Calculators</a>
+
+        <h1>Rowing Training Bands Calculator</h1>
+        <p class="subtitle">Calculate personalized training zones based on heart rate and 2000m erg performance</p>
+
+        <div class="card">
+            <form id="calculatorForm">
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="maxHR">
+                            Max Heart Rate (bpm)
+                            <span class="help-text">Your maximum heart rate</span>
+                        </label>
+                        <input
+                            type="number"
+                            id="maxHR"
+                            name="maxHR"
+                            min="100"
+                            max="250"
+                            step="1"
+                            required
+                            aria-label="Maximum heart rate in beats per minute"
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="restingHR">
+                            Resting Heart Rate (bpm)
+                            <span class="help-text">Measure first thing in the morning</span>
+                        </label>
+                        <input
+                            type="number"
+                            id="restingHR"
+                            name="restingHR"
+                            min="30"
+                            max="100"
+                            step="1"
+                            required
+                            aria-label="Resting heart rate in beats per minute"
+                        >
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>2000m Test Result</label>
+                    <div class="toggle-group">
+                        <button type="button" class="toggle-btn active" data-mode="pace" aria-pressed="true">Pace (mm:ss/500m)</button>
+                        <button type="button" class="toggle-btn" data-mode="watts" aria-pressed="false">Watts</button>
+                    </div>
+                </div>
+
+                <div class="input-group" id="paceInputGroup">
+                    <label for="paceMin">
+                        2000m Pace (per 500m)
+                        <span class="help-text">Your best 2000m average pace</span>
+                    </label>
+                    <div class="pace-inputs">
+                        <input
+                            type="number"
+                            id="paceMin"
+                            name="paceMin"
+                            min="0"
+                            max="9"
+                            step="1"
+                            placeholder="1"
+                            aria-label="Pace minutes"
+                        >
+                        <span class="pace-separator">:</span>
+                        <input
+                            type="number"
+                            id="paceSec"
+                            name="paceSec"
+                            min="0"
+                            max="59"
+                            step="0.1"
+                            placeholder="45.0"
+                            aria-label="Pace seconds"
+                        >
+                        <span class="unit-label">/500m</span>
+                    </div>
+                </div>
+
+                <div class="input-group hidden" id="wattsInputGroup">
+                    <label for="watts">
+                        2000m Average Power
+                        <span class="help-text">Your best 2000m average watts</span>
+                    </label>
+                    <input
+                        type="number"
+                        id="watts"
+                        name="watts"
+                        min="50"
+                        max="1000"
+                        step="1"
+                        placeholder="300"
+                        aria-label="Power in watts"
+                    >
+                </div>
+            </form>
+
+            <div id="results" class="hidden" aria-live="polite">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Zone</th>
+                            <th id="hrHeader">Heart Rate (bpm)</th>
+                            <th>HRR%</th>
+                            <th>Pace (/500m)</th>
+                            <th>% of 2k Power</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                        <!-- Results will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>About Training Zones</h3>
+            <p>
+                <strong>UT2 (Aerobic Endurance):</strong> Long, steady-state pieces. Builds aerobic base and endurance.<br>
+                <strong>UT1 (Intense Aerobic):</strong> Moderate intensity. Improves aerobic capacity and lactate threshold.<br>
+                <strong>AT (Threshold):</strong> Hard but sustainable. Pushes lactate threshold higher.<br>
+                <strong>TR (Transport):</strong> Very hard intervals. Develops anaerobic capacity.<br>
+                <strong>AN (Max):</strong> Maximum effort. Builds peak power and speed.
+            </p>
+        </div>
+
+        <div class="info-box">
+            <h3>Sources</h3>
+            <p>
+                Based on the Interactive 2000m Programme by Indoor Sports Services, which is unforutnately no longer available online.
+            </p>
+        </div>
+
+        <footer class="github-links">
+            <p>
+                <a href="https://github.com/guyru/calculators" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+                ·
+                <a href="https://github.com/guyru/calculators/issues" target="_blank" rel="noopener noreferrer">Report Issue</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Training zone definitions
+        const zones = [
+            {
+                name: 'UT2',
+                description: 'Aerobic Endurance',
+                hrrMin: 65,
+                hrrMax: 70,
+                powerMin: 45,
+                powerMax: 60
+            },
+            {
+                name: 'UT1',
+                description: 'Intense Aerobic',
+                hrrMin: 70,
+                hrrMax: 80,
+                powerMin: 60,
+                powerMax: 70
+            },
+            {
+                name: 'AT',
+                description: 'Threshold',
+                hrrMin: 80,
+                hrrMax: 85,
+                powerMin: 70,
+                powerMax: 80
+            },
+            {
+                name: 'TR',
+                description: 'Transport',
+                hrrMin: 85,
+                hrrMax: 95,
+                powerMin: 80,
+                powerMax: 105
+            },
+            {
+                name: 'AN',
+                description: 'Max',
+                hrrMin: 95,
+                hrrMax: 100,
+                powerMin: 105,
+                powerMax: 115
+            }
+        ];
+
+        // DOM elements
+        const form = document.getElementById('calculatorForm');
+        const maxHRInput = document.getElementById('maxHR');
+        const restingHRInput = document.getElementById('restingHR');
+        const paceMinInput = document.getElementById('paceMin');
+        const paceSecInput = document.getElementById('paceSec');
+        const wattsInput = document.getElementById('watts');
+        const paceInputGroup = document.getElementById('paceInputGroup');
+        const wattsInputGroup = document.getElementById('wattsInputGroup');
+        const results = document.getElementById('results');
+        const resultsBody = document.getElementById('resultsBody');
+        const hrHeader = document.getElementById('hrHeader');
+        const toggleBtns = document.querySelectorAll('.toggle-btn');
+
+        let currentMode = 'pace';
+
+        // Toggle between pace and watts input
+        toggleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.dataset.mode;
+                const previousMode = currentMode;
+                currentMode = mode;
+
+                toggleBtns.forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-pressed', 'false');
+                });
+                btn.classList.add('active');
+                btn.setAttribute('aria-pressed', 'true');
+
+                // Sync values between pace and watts
+                if (mode === 'pace' && previousMode === 'watts') {
+                    // Switching to pace mode - convert watts to pace
+                    const watts = parseFloat(wattsInput.value);
+                    if (watts) {
+                        const paceSeconds = wattsToPace(watts);
+                        const minutes = Math.floor(paceSeconds / 60);
+                        const seconds = paceSeconds % 60;
+                        paceMinInput.value = minutes;
+                        paceSecInput.value = seconds.toFixed(1);
+                    }
+                    paceInputGroup.classList.remove('hidden');
+                    wattsInputGroup.classList.add('hidden');
+                    wattsInput.removeAttribute('required');
+                    paceMinInput.setAttribute('required', '');
+                    paceSecInput.setAttribute('required', '');
+                } else if (mode === 'watts' && previousMode === 'pace') {
+                    // Switching to watts mode - convert pace to watts
+                    const paceMin = parseFloat(paceMinInput.value);
+                    const paceSec = parseFloat(paceSecInput.value);
+                    if ((paceMin || paceMin === 0) && (paceSec || paceSec === 0)) {
+                        const paceSeconds = paceToSeconds(paceMin, paceSec);
+                        const watts = paceToWatts(paceSeconds);
+                        wattsInput.value = Math.round(watts);
+                    }
+                    paceInputGroup.classList.add('hidden');
+                    wattsInputGroup.classList.remove('hidden');
+                    paceMinInput.removeAttribute('required');
+                    paceSecInput.removeAttribute('required');
+                    wattsInput.setAttribute('required', '');
+                }
+
+                calculate();
+            });
+        });
+
+        // Convert pace (mm:ss) to total seconds per 500m
+        function paceToSeconds(minutes, seconds) {
+            return minutes * 60 + seconds;
+        }
+
+        // Convert seconds per 500m to mm:ss format
+        function secondsToPace(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${minutes}:${seconds.toFixed(1).padStart(4, '0')}`;
+        }
+
+        // Convert watts to pace (seconds per 500m)
+        function wattsToPace(watts) {
+            return 500 * Math.cbrt(2.80 / watts);
+        }
+
+        // Convert pace (seconds per 500m) to watts
+        function paceToWatts(paceSeconds) {
+            return 2.80 / Math.pow(paceSeconds / 500, 3);
+        }
+
+        // Calculate target HR using Karvonen method
+        function calculateTargetHR(maxHR, restingHR, intensity) {
+            const hrr = maxHR - restingHR; // Heart Rate Reserve
+            return Math.round(hrr * (intensity / 100) + restingHR);
+        }
+
+        // Format pace for display
+        function formatPace(paceSeconds) {
+            const minutes = Math.floor(paceSeconds / 60);
+            const seconds = paceSeconds % 60;
+            const secStr = seconds < 10 ? `0${seconds.toFixed(1)}` : seconds.toFixed(1);
+            return `${minutes}:${secStr}`;
+        }
+
+        // Main calculation function
+        function calculate() {
+            const maxHR = parseFloat(maxHRInput.value);
+            const restingHR = parseFloat(restingHRInput.value);
+            const hasHRData = maxHR && restingHR && maxHR > restingHR;
+
+            let base2kWatts;
+
+            if (currentMode === 'pace') {
+                const paceMin = parseFloat(paceMinInput.value);
+                const paceSec = parseFloat(paceSecInput.value);
+
+                if (!paceMin && paceMin !== 0 || !paceSec && paceSec !== 0) return;
+
+                const paceSeconds = paceToSeconds(paceMin, paceSec);
+                base2kWatts = paceToWatts(paceSeconds);
+            } else {
+                const watts = parseFloat(wattsInput.value);
+                if (!watts) return;
+                base2kWatts = watts;
+            }
+
+            if (!base2kWatts) return;
+
+            // Show/hide HR column based on whether we have HR data
+            if (hasHRData) {
+                hrHeader.classList.remove('hidden');
+            } else {
+                hrHeader.classList.add('hidden');
+            }
+
+            // Calculate zones
+            resultsBody.innerHTML = '';
+
+            zones.forEach(zone => {
+                const powerMin = base2kWatts * (zone.powerMin / 100);
+                const powerMax = base2kWatts * (zone.powerMax / 100);
+
+                const paceMin = wattsToPace(powerMax); // Higher watts = faster pace (lower seconds)
+                const paceMax = wattsToPace(powerMin); // Lower watts = slower pace (higher seconds)
+
+                const row = document.createElement('tr');
+
+                let hrCell = '';
+                if (hasHRData) {
+                    const hrMin = calculateTargetHR(maxHR, restingHR, zone.hrrMin);
+                    const hrMax = calculateTargetHR(maxHR, restingHR, zone.hrrMax);
+                    hrCell = `<td>${hrMin} - ${hrMax}</td>`;
+                } else {
+                    hrCell = `<td class="hidden"></td>`;
+                }
+
+                row.innerHTML = `
+                    <td>
+                        <span class="zone-name">${zone.name}</span>
+                        <span class="zone-description">${zone.description}</span>
+                    </td>
+                    ${hrCell}
+                    <td>${zone.hrrMin} - ${zone.hrrMax}</td>
+                    <td>${formatPace(paceMin)} - ${formatPace(paceMax)}</td>
+                    <td>${zone.powerMin} - ${zone.powerMax}%</td>
+                `;
+                resultsBody.appendChild(row);
+            });
+
+            results.classList.remove('hidden');
+        }
+
+        // Add input listeners
+        maxHRInput.addEventListener('input', calculate);
+        restingHRInput.addEventListener('input', calculate);
+        paceMinInput.addEventListener('input', calculate);
+        paceSecInput.addEventListener('input', calculate);
+        wattsInput.addEventListener('input', calculate);
+
+        // Prevent form submission
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            calculate();
+        });
+    </script>
+</body>
+</html>
