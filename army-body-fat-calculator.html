@@ -67,6 +67,8 @@
             <div class="main-result" id="bodyFatPercentage">--.--%</div>
             <div class="results-text">Body Fat Percentage</div>
             <div class="category" id="category">--</div>
+            <div class="secondary-result" id="fatMass" style="margin-top: var(--spacing-md);">--.- kg</div>
+            <div class="results-text">Fat Mass</div>
         </div>
 
         <div id="error" class="error" role="alert" aria-live="assertive">
@@ -105,6 +107,7 @@
         const errorDiv = document.getElementById('error');
         const bodyFatPercentageEl = document.getElementById('bodyFatPercentage');
         const categoryEl = document.getElementById('category');
+        const fatMassEl = document.getElementById('fatMass');
         const unitsSelect = document.getElementById('units');
 
         // Unit elements
@@ -223,9 +226,14 @@
             // Cap at reasonable maximum
             bodyFatPercentage = Math.min(bodyFatPercentage, 50);
 
+            // Calculate fat mass (use unrounded percentage)
+            const fatMass = (bodyFatPercentage / 100) * weight;
+            const fatMassUnit = units === 'metric' ? 'kg' : 'lb';
+
             // Display results
             bodyFatPercentageEl.textContent = bodyFatPercentage.toFixed(1) + '%';
             categoryEl.textContent = getBodyFatCategory(bodyFatPercentage, gender);
+            fatMassEl.textContent = fatMass.toFixed(1) + ' ' + fatMassUnit;
             resultsDiv.classList.remove('hidden');
         }
 
