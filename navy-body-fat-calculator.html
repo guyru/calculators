@@ -69,7 +69,7 @@
                 <div class="unit-label" id="waistUnit">centimeters (at navel level)</div>
             </div>
 
-            <div class="form-group" id="hipGroup" style="display: none;">
+            <div class="form-group hidden" id="hipGroup">
                 <label for="hip">Hip</label>
                 <input type="number" id="hip" min="50" max="200" step="0.1"
                        aria-describedby="hipUnit" aria-label="Hip circumference measurement">
@@ -134,10 +134,10 @@
         // Show/hide hip measurement based on gender
         genderSelect.addEventListener('change', function() {
             if (this.value === 'female') {
-                hipGroup.style.display = 'block';
+                hipGroup.classList.remove('hidden');
                 hipInput.required = true;
             } else {
-                hipGroup.style.display = 'none';
+                hipGroup.classList.add('hidden');
                 hipInput.required = false;
                 hipInput.value = '';
             }

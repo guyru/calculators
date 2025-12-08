@@ -46,7 +46,8 @@
             background: var(--color-primary-hover);
         }
 
-        .tap-button:active {
+        .tap-button:active,
+        .tap-button.active {
             transform: scale(0.98);
             background: var(--color-primary-hover);
         }
@@ -273,22 +274,14 @@
         document.addEventListener('keydown', function(event) {
             if (event.code === 'Space') {
                 event.preventDefault(); // Prevent page scrolling
+                tapButton.classList.add('active');
                 tapButton.click();
-            }
-        });
-
-        // Add visual feedback for keyboard tapping
-        document.addEventListener('keydown', function(event) {
-            if (event.code === 'Space') {
-                tapButton.style.transform = 'translateY(0)';
-                tapButton.style.background = 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)';
             }
         });
 
         document.addEventListener('keyup', function(event) {
             if (event.code === 'Space') {
-                tapButton.style.transform = '';
-                tapButton.style.background = '';
+                tapButton.classList.remove('active');
             }
         });
     </script>
