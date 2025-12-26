@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Rep Max (1RM) Calculator - Epley Formula</title>
+    <meta name="description" content="Calculate your one-rep max (1RM) using Epley's formula. Get your estimated 1RM and a complete rep-max table for training planning.">
+    <meta name="keywords" content="1rm calculator, one rep max, epley formula, strength training, weightlifting, rep max, training calculator">
+    <meta name="author" content="guyru">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://guyru.github.io/calculators/one-rep-max-calculator.html">
+    <meta property="og:title" content="One Rep Max (1RM) Calculator - Epley Formula">
+    <meta property="og:description" content="Calculate your one-rep max (1RM) using Epley's formula. Get your estimated 1RM and a complete rep-max table for training planning.">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:url" content="https://guyru.github.io/calculators/one-rep-max-calculator.html">
+    <meta property="twitter:title" content="One Rep Max (1RM) Calculator - Epley Formula">
+    <meta property="twitter:description" content="Calculate your one-rep max (1RM) using Epley's formula. Get your estimated 1RM and a complete rep-max table for training planning.">
+
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        .formula-section {
+            margin-top: var(--spacing-sm);
+            padding-top: var(--spacing-sm);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .formula-section h4 {
+            color: var(--color-text);
+            margin-bottom: var(--spacing-xs);
+            font-size: 0.9375rem;
+            font-weight: 600;
+        }
+
+        .formula-section p {
+            margin-top: var(--spacing-sm);
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        .formula {
+            background: var(--color-bg);
+            padding: var(--spacing-xs);
+            border-radius: var(--radius-sm);
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.8125rem;
+            margin-bottom: 0.5rem;
+            overflow-x: auto;
+            color: var(--color-text-secondary);
+        }
+
+        .rep-max-table {
+            width: 100%;
+            margin-top: var(--spacing-md);
+            border-collapse: collapse;
+        }
+
+        .rep-max-table th,
+        .rep-max-table td {
+            padding: 0.625rem;
+            text-align: center;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .rep-max-table th {
+            background: var(--color-bg);
+            font-weight: 600;
+            color: var(--color-text);
+            font-size: 0.875rem;
+        }
+
+        .rep-max-table td {
+            font-size: 0.9375rem;
+            color: var(--color-text);
+        }
+
+        .rep-max-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .rep-max-table tr:hover {
+            background: var(--color-bg);
+        }
+
+        .table-container {
+            margin-top: var(--spacing-md);
+            overflow-x: auto;
+        }
+
+        .results {
+            min-height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="header">
+            <h1>One Rep Max (1RM) Calculator</h1>
+            <p>Calculate your estimated 1RM using Epley's formula</p>
+        </div>
+
+        <form id="calculatorForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="weight">Weight</label>
+                    <input
+                        type="number"
+                        id="weight"
+                        name="weight"
+                        step="0.1"
+                        min="0.1"
+                        placeholder="Enter weight"
+                        aria-label="Weight lifted"
+                        required
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="reps">Repetitions</label>
+                    <input
+                        type="number"
+                        id="reps"
+                        name="reps"
+                        step="1"
+                        min="2"
+                        max="20"
+                        placeholder="Enter reps"
+                        aria-label="Number of repetitions"
+                        required
+                    >
+                    <div class="unit-label">Must be 2 or more</div>
+                </div>
+            </div>
+        </form>
+
+        <div id="results" class="results hidden" aria-live="polite" aria-label="Calculation results">
+            <div class="main-result" id="mainResult"></div>
+            <div class="results-text">Estimated One Rep Max</div>
+
+            <div class="table-container">
+                <table class="rep-max-table" id="repMaxTable">
+                    <thead>
+                        <tr>
+                            <th>Reps</th>
+                            <th>Estimated Weight</th>
+                        </tr>
+                    </thead>
+                    <tbody id="repMaxTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="error" class="error" role="alert" aria-live="assertive">
+            Please enter valid values for weight and repetitions (2 or more).
+        </div>
+
+        <div class="info-box">
+            <strong>About Epley's Formula:</strong>
+            <p>Epley's formula is one of the most commonly used methods for estimating one-rep max (1RM) based on sub-maximal lifts. It provides a good estimate for most individuals when using weights in the 2-10 rep range.</p>
+
+            <div class="formula-section">
+                <h4>Formula:</h4>
+                <div class="formula">1RM = weight × (1 + repetitions / 30)</div>
+                <p>
+                    <strong>Note:</strong> This formula works best with 2-10 repetitions. Higher rep ranges may provide less accurate estimates. The formula is valid for r &gt; 1 (at least 2 repetitions).
+                </p>
+            </div>
+        </div>
+
+        <div class="github-links">
+            <a href="index.html" aria-label="Back to calculators index">← Back to Calculators</a>
+            <a href="https://github.com/guyru/calculators" target="_blank" rel="noopener noreferrer">View Source</a>
+            <a href="https://github.com/guyru/calculators/issues" target="_blank" rel="noopener noreferrer">Report Issue</a>
+        </div>
+    </div>
+
+    <script>
+        const weightInput = document.getElementById('weight');
+        const repsInput = document.getElementById('reps');
+        const resultsDiv = document.getElementById('results');
+        const errorDiv = document.getElementById('error');
+        const mainResult = document.getElementById('mainResult');
+        const repMaxTableBody = document.getElementById('repMaxTableBody');
+
+        // Epley's formula: 1RM = w * (1 + r/30)
+        function calculateOneRepMax(weight, reps) {
+            if (reps <= 1) {
+                return null;
+            }
+            return weight * (1 + reps / 30);
+        }
+
+        // Calculate estimated weight for a given number of reps based on 1RM
+        function calculateWeightForReps(oneRM, targetReps) {
+            if (targetReps <= 1) {
+                return oneRM;
+            }
+            // Rearranging Epley's formula: w = 1RM / (1 + r/30)
+            return oneRM / (1 + targetReps / 30);
+        }
+
+        function updateCalculation() {
+            const weight = parseFloat(weightInput.value);
+            const reps = parseInt(repsInput.value);
+
+            if (!weight || !reps || weight <= 0 || reps < 2) {
+                hideResults();
+                if (weightInput.value || repsInput.value) {
+                    showError();
+                }
+                return;
+            }
+
+            const oneRM = calculateOneRepMax(weight, reps);
+
+            if (oneRM === null) {
+                showError();
+                return;
+            }
+
+            // Display the 1RM result
+            mainResult.textContent = oneRM.toFixed(1);
+
+            // Generate the rep-max table (2-15 reps)
+            repMaxTableBody.innerHTML = '';
+            for (let targetReps = 2; targetReps <= 15; targetReps++) {
+                const estimatedWeight = calculateWeightForReps(oneRM, targetReps);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${targetReps}</td>
+                    <td>${estimatedWeight.toFixed(1)}</td>
+                `;
+                repMaxTableBody.appendChild(row);
+            }
+
+            showResults();
+        }
+
+        function showResults() {
+            resultsDiv.classList.remove('hidden');
+            errorDiv.style.display = 'none';
+        }
+
+        function hideResults() {
+            resultsDiv.classList.add('hidden');
+        }
+
+        function showError() {
+            errorDiv.style.display = 'block';
+        }
+
+        // Event listeners
+        weightInput.addEventListener('input', updateCalculation);
+        repsInput.addEventListener('input', updateCalculation);
+
+        // Unit tests for calculator logic
+        function runUnitTests() {
+            const testVectors = [
+                // Test cases based on Epley's formula
+                { weight: 100, reps: 5, expected1RM: 116.67 },
+                { weight: 200, reps: 3, expected1RM: 220.0 },
+                { weight: 150, reps: 8, expected1RM: 190.0 },
+                { weight: 80, reps: 10, expected1RM: 106.67 },
+
+                // Reverse test: if 1RM is 200, weight for 5 reps should be ~171.43
+                { oneRM: 200, targetReps: 5, expectedWeight: 171.43 }
+            ];
+
+            console.log('Running 1RM calculator unit tests...');
+            let passedTests = 0;
+            let totalTests = 0;
+
+            // Test 1RM calculations
+            testVectors.slice(0, 4).forEach((test, index) => {
+                totalTests++;
+                const actual1RM = calculateOneRepMax(test.weight, test.reps);
+                const tolerance = 0.5; // Allow 0.5 tolerance
+                const passed = Math.abs(actual1RM - test.expected1RM) <= tolerance;
+
+                if (passed) passedTests++;
+                console.log(`Test ${index + 1} - 1RM: ${test.weight} × ${test.reps} reps = ${actual1RM.toFixed(2)} (expected: ${test.expected1RM}) ${passed ? '✓' : '✗'}`);
+            });
+
+            // Test weight for reps calculations
+            const reverseTest = testVectors[4];
+            totalTests++;
+            const actualWeight = calculateWeightForReps(reverseTest.oneRM, reverseTest.targetReps);
+            const tolerance = 0.5;
+            const passed = Math.abs(actualWeight - reverseTest.expectedWeight) <= tolerance;
+
+            if (passed) passedTests++;
+            console.log(`Test 5 - Weight for reps: 1RM ${reverseTest.oneRM}, ${reverseTest.targetReps} reps = ${actualWeight.toFixed(2)} (expected: ${reverseTest.expectedWeight}) ${passed ? '✓' : '✗'}`);
+
+            console.log(`Unit tests completed: ${passedTests}/${totalTests} passed`);
+            return passedTests === totalTests;
+        }
+
+        // Run unit tests on page load
+        runUnitTests();
+
+        // Initialize with example values
+        weightInput.value = '100';
+        repsInput.value = '5';
+        updateCalculation();
+    </script>
+</body>
+</html>
