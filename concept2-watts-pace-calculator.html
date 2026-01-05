@@ -147,6 +147,42 @@
         let isUpdatingFromWatts = false;
         let isUpdatingFromPace = false;
 
+        // URL fragment state management
+        function parseHash() {
+            const hash = window.location.hash.slice(1);
+            const params = {};
+            if (hash) {
+                hash.split('&').forEach(part => {
+                    const [key, value] = part.split('=');
+                    if (key && value !== undefined) {
+                        params[decodeURIComponent(key)] = decodeURIComponent(value);
+                    }
+                });
+            }
+            return params;
+        }
+
+        function updateHash() {
+            const params = {};
+            if (wattsInput.value) params.watts = wattsInput.value;
+
+            const hashString = Object.entries(params)
+                .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+                .join('&');
+            history.replaceState(null, '', hashString ? '#' + hashString : window.location.pathname);
+        }
+
+        function loadFromHash() {
+            const params = parseHash();
+            if (Object.keys(params).length === 0) return false;
+
+            if (params.watts) {
+                wattsInput.value = params.watts;
+                return true;
+            }
+            return false;
+        }
+
         // Convert pace (minutes:seconds) to total seconds
         function paceToSeconds(minutes, seconds) {
             return (minutes || 0) * 60 + (seconds || 0);
@@ -193,6 +229,7 @@
 
                 mainResult.textContent = `${watts} watts → ${formatPace(paceSeconds)} pace`;
                 showResults();
+                updateHash();
             } else {
                 hideResults();
             }
@@ -214,6 +251,7 @@
 
                 mainResult.textContent = `${formatPace(totalSeconds)} pace → ${watts.toFixed(1)} watts`;
                 showResults();
+                updateHash();
             } else {
                 hideResults();
             }
@@ -288,8 +326,10 @@
         // Run unit tests on page load
         runUnitTests();
 
-        // Initialize with example values
-        wattsInput.value = '250';
+        // Initialize from URL hash or with example values
+        if (!loadFromHash()) {
+            wattsInput.value = '250';
+        }
         updateFromWatts();
     </script>
 </body>

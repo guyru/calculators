@@ -108,6 +108,7 @@
         const bodyFatPercentageEl = document.getElementById('bodyFatPercentage');
         const categoryEl = document.getElementById('category');
         const fatMassEl = document.getElementById('fatMass');
+        const genderSelect = document.getElementById('gender');
         const unitsSelect = document.getElementById('units');
 
         // Unit elements
@@ -116,9 +117,50 @@
         const weightUnit = document.getElementById('weightUnit');
         const abdomenUnit = document.getElementById('abdomenUnit');
 
+        // URL fragment state management
+        function parseHash() {
+            const hash = window.location.hash.slice(1);
+            const params = {};
+            if (hash) {
+                hash.split('&').forEach(part => {
+                    const [key, value] = part.split('=');
+                    if (key && value !== undefined) {
+                        params[decodeURIComponent(key)] = decodeURIComponent(value);
+                    }
+                });
+            }
+            return params;
+        }
+
+        function updateHash() {
+            const params = {};
+            if (genderSelect.value) params.gender = genderSelect.value;
+            if (unitsSelect.value) params.units = unitsSelect.value;
+            if (weightInput.value) params.weight = weightInput.value;
+            if (abdomenInput.value) params.abdomen = abdomenInput.value;
+
+            const hashString = Object.entries(params)
+                .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+                .join('&');
+            history.replaceState(null, '', hashString ? '#' + hashString : window.location.pathname);
+        }
+
+        function loadFromHash() {
+            const params = parseHash();
+            if (Object.keys(params).length === 0) return;
+
+            if (params.units) unitsSelect.value = params.units;
+            updateUnits();
+
+            if (params.gender) genderSelect.value = params.gender;
+            if (params.weight) weightInput.value = params.weight;
+            if (params.abdomen) abdomenInput.value = params.abdomen;
+        }
+
         // Handle unit changes
         unitsSelect.addEventListener('change', function() {
             updateUnits();
+            updateHash();
             calculateBodyFat();
         });
 
@@ -148,8 +190,14 @@
 
         // Add event listeners to all inputs
         inputs.forEach(input => {
-            input.addEventListener('input', calculateBodyFat);
-            input.addEventListener('change', calculateBodyFat);
+            input.addEventListener('input', function() {
+                updateHash();
+                calculateBodyFat();
+            });
+            input.addEventListener('change', function() {
+                updateHash();
+                calculateBodyFat();
+            });
         });
 
         function poundsToKg(pounds) {
@@ -252,6 +300,9 @@
                 return 'Obese';
             }
         }
+
+        // Initialize from URL hash on page load
+        loadFromHash();
 
         // Initialize units on page load
         updateUnits();

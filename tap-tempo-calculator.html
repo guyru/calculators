@@ -223,9 +223,6 @@
             }
         }
 
-        // Initialize the tap tempo calculator
-        let tapTempo = new TapTempo(5, 5);
-
         // DOM elements
         const tapButton = document.getElementById('tapButton');
         const bpmValue = document.getElementById('bpmValue');
@@ -233,6 +230,53 @@
         const resetButton = document.getElementById('resetButton');
         const sampleSizeInput = document.getElementById('sampleSize');
         const timeoutInput = document.getElementById('timeout');
+
+        // URL fragment state management
+        function parseHash() {
+            const hash = window.location.hash.slice(1);
+            const params = {};
+            if (hash) {
+                hash.split('&').forEach(part => {
+                    const [key, value] = part.split('=');
+                    if (key && value !== undefined) {
+                        params[decodeURIComponent(key)] = decodeURIComponent(value);
+                    }
+                });
+            }
+            return params;
+        }
+
+        function updateHash() {
+            const params = {};
+            if (sampleSizeInput.value && sampleSizeInput.value !== '5') {
+                params.sampleSize = sampleSizeInput.value;
+            }
+            if (timeoutInput.value && timeoutInput.value !== '5') {
+                params.timeout = timeoutInput.value;
+            }
+
+            const hashString = Object.entries(params)
+                .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+                .join('&');
+            history.replaceState(null, '', hashString ? '#' + hashString : window.location.pathname);
+        }
+
+        function loadFromHash() {
+            const params = parseHash();
+            if (Object.keys(params).length === 0) return;
+
+            if (params.sampleSize) sampleSizeInput.value = params.sampleSize;
+            if (params.timeout) timeoutInput.value = params.timeout;
+        }
+
+        // Load settings from URL hash
+        loadFromHash();
+
+        // Initialize the tap tempo calculator with current settings
+        let tapTempo = new TapTempo(
+            parseInt(sampleSizeInput.value) || 5,
+            parseInt(timeoutInput.value) || 5
+        );
 
         // Handle tap button clicks
         tapButton.addEventListener('click', function() {
@@ -264,6 +308,7 @@
                 // Reset display when settings change
                 bpmValue.textContent = '--';
                 tapCount.textContent = 'Tap to start';
+                updateHash();
             }
         }
 

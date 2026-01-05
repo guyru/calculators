@@ -185,6 +185,41 @@
         const mainResult = document.getElementById('mainResult');
         const repMaxTableBody = document.getElementById('repMaxTableBody');
 
+        // URL fragment state management
+        function parseHash() {
+            const hash = window.location.hash.slice(1);
+            const params = {};
+            if (hash) {
+                hash.split('&').forEach(part => {
+                    const [key, value] = part.split('=');
+                    if (key && value !== undefined) {
+                        params[decodeURIComponent(key)] = decodeURIComponent(value);
+                    }
+                });
+            }
+            return params;
+        }
+
+        function updateHash() {
+            const params = {};
+            if (weightInput.value) params.weight = weightInput.value;
+            if (repsInput.value) params.reps = repsInput.value;
+
+            const hashString = Object.entries(params)
+                .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+                .join('&');
+            history.replaceState(null, '', hashString ? '#' + hashString : window.location.pathname);
+        }
+
+        function loadFromHash() {
+            const params = parseHash();
+            if (Object.keys(params).length === 0) return false;
+
+            if (params.weight) weightInput.value = params.weight;
+            if (params.reps) repsInput.value = params.reps;
+            return true;
+        }
+
         // Epley's formula: 1RM = w * (1 + r/30)
         function calculateOneRepMax(weight, reps) {
             if (reps <= 1) {
@@ -205,6 +240,8 @@
         function updateCalculation() {
             const weight = parseFloat(weightInput.value);
             const reps = parseInt(repsInput.value);
+
+            updateHash();
 
             if (!weight || !reps || weight <= 0 || reps < 2) {
                 hideResults();
@@ -301,9 +338,11 @@
         // Run unit tests on page load
         runUnitTests();
 
-        // Initialize with example values
-        weightInput.value = '100';
-        repsInput.value = '5';
+        // Initialize from URL hash or with example values
+        if (!loadFromHash()) {
+            weightInput.value = '100';
+            repsInput.value = '5';
+        }
         updateCalculation();
     </script>
 </body>

@@ -131,6 +131,61 @@
         const waistUnit = document.getElementById('waistUnit');
         const hipUnit = document.getElementById('hipUnit');
 
+        // URL fragment state management
+        function parseHash() {
+            const hash = window.location.hash.slice(1);
+            const params = {};
+            if (hash) {
+                hash.split('&').forEach(part => {
+                    const [key, value] = part.split('=');
+                    if (key && value !== undefined) {
+                        params[decodeURIComponent(key)] = decodeURIComponent(value);
+                    }
+                });
+            }
+            return params;
+        }
+
+        function updateHash() {
+            const params = {};
+            if (genderSelect.value) params.gender = genderSelect.value;
+            if (unitsSelect.value) params.units = unitsSelect.value;
+            if (heightInput.value) params.height = heightInput.value;
+            if (neckInput.value) params.neck = neckInput.value;
+            if (waistInput.value) params.waist = waistInput.value;
+            if (genderSelect.value === 'female' && hipInput.value) {
+                params.hip = hipInput.value;
+            }
+
+            const hashString = Object.entries(params)
+                .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+                .join('&');
+            history.replaceState(null, '', hashString ? '#' + hashString : window.location.pathname);
+        }
+
+        function loadFromHash() {
+            const params = parseHash();
+            if (Object.keys(params).length === 0) return;
+
+            if (params.units) unitsSelect.value = params.units;
+            updateUnits();
+
+            if (params.gender) {
+                genderSelect.value = params.gender;
+                if (params.gender === 'female') {
+                    hipGroup.classList.remove('hidden');
+                    hipInput.required = true;
+                } else {
+                    hipGroup.classList.add('hidden');
+                    hipInput.required = false;
+                }
+            }
+            if (params.height) heightInput.value = params.height;
+            if (params.neck) neckInput.value = params.neck;
+            if (params.waist) waistInput.value = params.waist;
+            if (params.hip) hipInput.value = params.hip;
+        }
+
         // Show/hide hip measurement based on gender
         genderSelect.addEventListener('change', function() {
             if (this.value === 'female') {
@@ -141,12 +196,14 @@
                 hipInput.required = false;
                 hipInput.value = '';
             }
+            updateHash();
             calculateBodyFat();
         });
 
         // Handle unit changes
         unitsSelect.addEventListener('change', function() {
             updateUnits();
+            updateHash();
             calculateBodyFat();
         });
 
@@ -192,8 +249,14 @@
 
         // Add event listeners to all inputs
         inputs.forEach(input => {
-            input.addEventListener('input', calculateBodyFat);
-            input.addEventListener('change', calculateBodyFat);
+            input.addEventListener('input', function() {
+                updateHash();
+                calculateBodyFat();
+            });
+            input.addEventListener('change', function() {
+                updateHash();
+                calculateBodyFat();
+            });
         });
 
         function inchesToCm(inches) {
@@ -283,6 +346,9 @@
                 return 'Obese';
             }
         }
+
+        // Initialize from URL hash on page load
+        loadFromHash();
 
         // Initialize units on page load
         updateUnits();

@@ -88,6 +88,55 @@ Each calculator should include:
 - Show validation errors clearly
 - Calculate results in real-time on input change when possible
 
+### URL Fragment State
+Each calculator should persist its input state in the URL fragment (hash) to allow bookmarking and sharing specific calculator states.
+
+**Required Functions:**
+```javascript
+// Parse URL fragment into key-value pairs
+function parseHash() {
+    const hash = window.location.hash.slice(1);
+    const params = {};
+    if (hash) {
+        hash.split('&').forEach(part => {
+            const [key, value] = part.split('=');
+            if (key && value !== undefined) {
+                params[decodeURIComponent(key)] = decodeURIComponent(value);
+            }
+        });
+    }
+    return params;
+}
+
+// Update URL fragment from current input values
+function updateHash() {
+    const params = {};
+    // Add non-empty input values to params
+    // Only include non-default values to keep URLs clean
+
+    const hashString = Object.entries(params)
+        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+        .join('&');
+    history.replaceState(null, '', hashString ? '#' + hashString : window.location.pathname);
+}
+
+// Load input values from URL fragment on page load
+function loadFromHash() {
+    const params = parseHash();
+    if (Object.keys(params).length === 0) return false;
+    // Populate input fields from params
+    return true;
+}
+```
+
+**Implementation Guidelines:**
+- Call `updateHash()` whenever inputs change (in event handlers or calculation functions)
+- Call `loadFromHash()` during page initialization, before setting default values
+- Use `history.replaceState()` instead of direct hash assignment to avoid polluting browser history
+- Only store input values, not calculated results
+- For calculators with default example values, only use defaults if `loadFromHash()` returns false
+- Omit default values from the hash to keep URLs clean (e.g., don't store `units=metric` if metric is the default)
+
 ### Device Sensors
 When using device sensors (orientation, geolocation, etc.):
 - Request permissions explicitly with clear UI

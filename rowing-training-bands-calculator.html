@@ -368,6 +368,68 @@
 
         let currentMode = 'pace';
 
+        // URL fragment state management
+        function parseHash() {
+            const hash = window.location.hash.slice(1);
+            const params = {};
+            if (hash) {
+                hash.split('&').forEach(part => {
+                    const [key, value] = part.split('=');
+                    if (key && value !== undefined) {
+                        params[decodeURIComponent(key)] = decodeURIComponent(value);
+                    }
+                });
+            }
+            return params;
+        }
+
+        function updateHash() {
+            const params = {};
+            if (maxHRInput.value) params.maxHR = maxHRInput.value;
+            if (restingHRInput.value) params.restingHR = restingHRInput.value;
+            if (currentMode !== 'pace') params.mode = currentMode;
+
+            if (currentMode === 'pace') {
+                if (paceMinInput.value) params.paceMin = paceMinInput.value;
+                if (paceSecInput.value) params.paceSec = paceSecInput.value;
+            } else {
+                if (wattsInput.value) params.watts = wattsInput.value;
+            }
+
+            const hashString = Object.entries(params)
+                .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+                .join('&');
+            history.replaceState(null, '', hashString ? '#' + hashString : window.location.pathname);
+        }
+
+        function loadFromHash() {
+            const params = parseHash();
+            if (Object.keys(params).length === 0) return;
+
+            if (params.maxHR) maxHRInput.value = params.maxHR;
+            if (params.restingHR) restingHRInput.value = params.restingHR;
+
+            // Set the mode and show/hide appropriate inputs
+            if (params.mode === 'watts') {
+                currentMode = 'watts';
+                paceInputGroup.classList.add('hidden');
+                wattsInputGroup.classList.remove('hidden');
+                toggleBtns.forEach(b => {
+                    if (b.dataset.mode === 'watts') {
+                        b.classList.add('active');
+                        b.setAttribute('aria-pressed', 'true');
+                    } else {
+                        b.classList.remove('active');
+                        b.setAttribute('aria-pressed', 'false');
+                    }
+                });
+                if (params.watts) wattsInput.value = params.watts;
+            } else {
+                if (params.paceMin) paceMinInput.value = params.paceMin;
+                if (params.paceSec) paceSecInput.value = params.paceSec;
+            }
+        }
+
         // Toggle between pace and watts input
         toggleBtns.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -414,6 +476,7 @@
                     wattsInput.setAttribute('required', '');
                 }
 
+                updateHash();
                 calculate();
             });
         });
@@ -523,17 +586,26 @@
         }
 
         // Add input listeners
-        maxHRInput.addEventListener('input', calculate);
-        restingHRInput.addEventListener('input', calculate);
-        paceMinInput.addEventListener('input', calculate);
-        paceSecInput.addEventListener('input', calculate);
-        wattsInput.addEventListener('input', calculate);
+        function handleInput() {
+            updateHash();
+            calculate();
+        }
+
+        maxHRInput.addEventListener('input', handleInput);
+        restingHRInput.addEventListener('input', handleInput);
+        paceMinInput.addEventListener('input', handleInput);
+        paceSecInput.addEventListener('input', handleInput);
+        wattsInput.addEventListener('input', handleInput);
 
         // Prevent form submission
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             calculate();
         });
+
+        // Initialize from URL hash on page load
+        loadFromHash();
+        calculate();
     </script>
 </body>
 </html>
